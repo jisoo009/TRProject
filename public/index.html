@@ -1,0 +1,263 @@
+
+    <!DOCTYPE html>
+    <html lang="ko">
+    <head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Time Remember</title>
+    <link rel="stylesheet" href="style.css">
+    <script src="script.js" defer></script>
+    </head>
+    <body>
+    <main class="app">
+
+        <!-- 첫 화면 -->
+        <section id="home-screen" class="screen home-screen">
+        <div class="home-content">
+            <p class="eyebrow">OUR LITTLE MOMENTS</p>
+            <h1>Time Remember</h1>
+            <p class="description">
+            친구들과 함께한 순간을 기록해 보세요.
+            </p>
+
+            <div class="memory-placeholder" aria-hidden="true">
+            <span>OUR<br>MEMORIES</span>
+            </div>
+
+            <button type="button" class="primary-button"
+            data-go="login">
+            시작하기
+            </button>
+        </div>
+        </section>
+
+        <!-- 로그인 화면 -->
+        <section id="login-screen" class="screen" hidden>
+        <div class="form-panel">
+            <h2>로그인</h2>
+            <p class="form-description">
+            다시 만나서 반가워요!
+            </p>
+
+            <form id="login-form">
+            <label for="login-email">이메일</label>
+            <input
+                id="login-email"
+                name="email"
+                type="email"
+                placeholder="이메일을 입력하세요"
+                autocomplete="email"
+                required
+            >
+
+            <label for="login-password">비밀번호</label>
+            <input
+                id="login-password"
+                name="password"
+                type="password"
+                placeholder="비밀번호를 입력하세요"
+                autocomplete="current-password"
+                required
+            >
+
+            <button type="submit" class="primary-button">
+                로그인
+            </button>
+            </form>
+
+            <p class="form-footer">
+            아직 회원이 아니신가요?
+            <button type="button" class="text-button"
+                data-go="register">
+                회원가입
+            </button>
+            </p>
+
+            <button type="button" class="back-button"
+            data-go="home">
+            ← 처음으로
+            </button>
+        </div>
+        </section>
+
+        <!-- 회원가입 화면 -->
+        <section id="register-screen" class="screen" hidden>
+        <div class="form-panel">
+            <h2>회원가입</h2>
+            <p class="form-description">
+            우리만의 추억을 시작해 보세요.
+            </p>
+
+            <form id="register-form">
+            <label for="register-nickname">닉네임</label>
+            <input
+                id="register-nickname"
+                name="nickname"
+                type="text"
+                placeholder="사용할 닉네임"
+                autocomplete="nickname"
+                required
+            >
+
+            <label for="register-email">이메일</label>
+            <input
+                id="register-email"
+                name="email"
+                type="email"
+                placeholder="이메일을 입력하세요"
+                autocomplete="email"
+                required
+            >
+
+            <label for="register-password">비밀번호</label>
+            <input
+                id="register-password"
+                name="password"
+                type="password"
+                placeholder="비밀번호 8자 이상"
+                minlength="8"
+                autocomplete="new-password"
+                required
+            >
+
+            <button type="submit" class="primary-button">
+                회원가입
+            </button>
+            </form>
+
+            <p class="form-footer">
+            이미 회원이신가요?
+            <button type="button" class="text-button"
+                data-go="login">
+                로그인
+            </button>
+            </p>
+
+            <button type="button" class="back-button"
+            data-go="home">
+            ← 처음으로
+            </button>
+        </div>
+        </section>
+    <!-- 로그인 후 화면 -->
+        <section id="dashboard-screen" class="screen" hidden>
+    <div class="form-panel">
+        <h2>Time Remember</h2>
+        <p id="welcome-message" class="form-description">
+        환영합니다!
+        </p>
+
+        <h3>새로운 친구 방 만들기</h3>
+        <form id="create-room-form">
+        <label for="room-name">방 이름</label>
+        <input
+            id="room-name"
+            name="room_name"
+            maxlength="100"
+            placeholder="예: 우리들의 추억"
+            required
+        >
+
+        <label for="room-description">방 설명</label>
+        <input
+            id="room-description"
+            name="description"
+            maxlength="500"
+            placeholder="방에 대한 간단한 설명"
+        >
+
+        <button type="submit" class="primary-button">
+            방 만들기
+        </button>
+        </form>
+
+        <hr>
+
+        <h3>초대 코드로 참여하기</h3>
+        <form id="join-room-form">
+        <label for="invite-code">초대 코드</label>
+        <input
+            id="invite-code"
+            name="invite_code"
+            placeholder="초대 코드를 입력하세요"
+            required
+        >
+
+        <button type="submit" class="primary-button">
+            방 참여하기
+        </button>
+        </form>
+
+        <hr>
+
+        <h3>내 친구 방</h3>
+        <button type="button" id="refresh-rooms-button">
+        방 목록 새로고침
+        </button>
+        <div id="room-list"></div>
+
+        <button type="button" id="logout-button" class="primary-button">
+        로그아웃
+        </button>
+    </div>
+    </section>
+    <!-- 약속 화면 -->
+    <section id="appointments-screen" class="screen" hidden>
+    <div class="form-panel">
+        <h2 id="appointment-room-title">친구 방</h2>
+        <p class="form-description">우리의 다음 만남을 계획해 보세요.</p>
+
+        <form id="appointment-form">
+        <label for="appointment-title">약속 제목</label>
+        <input
+            id="appointment-title"
+            name="title"
+            maxlength="200"
+            placeholder="예: 주말에 영화 보기"
+            required
+        >
+
+        <label for="appointment-date">날짜와 시간</label>
+        <input
+            id="appointment-date"
+            name="start_at"
+            type="datetime-local"
+            required
+        >
+
+        <label for="appointment-place">장소</label>
+        <input
+            id="appointment-place"
+            name="place"
+            maxlength="255"
+            placeholder="예: 강남역"
+            required
+        >
+
+        <label for="appointment-description">설명</label>
+        <textarea
+            id="appointment-description"
+            name="description"
+            maxlength="2000"
+            rows="3"
+            placeholder="추가로 기록할 내용"
+        ></textarea>
+
+        <button type="submit" class="primary-button">
+            약속 등록하기
+        </button>
+        </form>
+
+        <hr>
+
+        <h3>등록된 약속</h3>
+        <div id="appointment-list"></div>
+
+        <button type="button" id="back-to-rooms" class="back-button">
+        ← 친구 방으로 돌아가기
+        </button>
+    </div>
+    </section>
+    </main>
+    </body>
+    </html>
