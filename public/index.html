@@ -1,263 +1,223 @@
-
-    <!DOCTYPE html>
-    <html lang="ko">
-    <head>
+<!DOCTYPE html>
+<html lang="ko">
+<head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Time Remember</title>
-    <link rel="stylesheet" href="/css/style.css">
-    <script src="/js/script.js" defer></script>    
-    </head>
-    <body>
-    <main class="app">
+    <title>Save Memories</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@500;600&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="css/style.css">
+    <script src="js/script.js" defer></script>
+</head>
+<body>
+<main class="app">
 
-        <!-- 첫 화면 -->
-        <section id="home-screen" class="screen home-screen">
+    <!-- 1. 시작 화면 -->
+    <section id="home-screen" class="screen home-screen">
         <div class="home-content">
-            <p class="eyebrow">OUR LITTLE MOMENTS</p>
-            <h1>Time Remember</h1>
-            <p class="description">
-            친구들과 함께한 순간을 기록해 보세요.
-            </p>
+            <h1 class="brand-title">
+                <span class="brand-save">Save</span>
+                <span class="brand-memories">Memories</span>
+            </h1>
 
-            <div class="memory-placeholder" aria-hidden="true">
-            <span>OUR<br>MEMORIES</span>
-            </div>
-
-            <button type="button" class="primary-button"
-            data-go="login">
-            시작하기
+            <button type="button" class="primary-button" data-go="login">
+                시작하기
             </button>
         </div>
-        </section>
+    </section>
 
-        <!-- 로그인 화면 -->
-        <section id="login-screen" class="screen" hidden>
-        <div class="form-panel">
+    <!-- 2. 로그인 화면 -->
+    <section id="login-screen" class="screen" hidden>
+        <div class="form-panel has-icon">
+            <svg class="panel-icon" viewBox="0 0 130 110" aria-hidden="true">
+                <g transform="rotate(-20 58 62)">
+                    <path d="M40 34 L47 20 Q48 18 51 18 H69 Q72 18 73 20 L80 34 Z" fill="#d8b8ff"/>
+                    <rect x="18" y="32" width="80" height="54" rx="11" fill="#d8b8ff"/>
+                    <circle cx="58" cy="59" r="17" fill="#d8b8ff" stroke="#e5f1ff" stroke-width="6"/>
+                    <circle cx="30" cy="44" r="3.2" fill="#e5f1ff"/>
+                </g>
+                <path d="M97 10 L89 27 M112 20 L98 31" stroke="#000" stroke-width="5.5" stroke-linecap="round" fill="none"/>
+            </svg>
+
             <h2>로그인</h2>
-            <p class="form-description">
-            다시 만나서 반가워요!
-            </p>
 
             <form id="login-form">
-            <label for="login-email">이메일</label>
-            <input
-                id="login-email"
-                name="email"
-                type="email"
-                placeholder="이메일을 입력하세요"
-                autocomplete="email"
-                required
-            >
+                <input id="login-email" name="email" type="email"
+                    placeholder="이메일" aria-label="이메일"
+                    autocomplete="email" required>
 
-            <label for="login-password">비밀번호</label>
-            <input
-                id="login-password"
-                name="password"
-                type="password"
-                placeholder="비밀번호를 입력하세요"
-                autocomplete="current-password"
-                required
-            >
+                <input id="login-password" name="password" type="password"
+                    placeholder="비밀번호" aria-label="비밀번호"
+                    autocomplete="current-password" required>
 
-            <button type="submit" class="primary-button">
-                로그인
-            </button>
+                <button type="submit" class="primary-button">로그인</button>
             </form>
 
             <p class="form-footer">
-            아직 회원이 아니신가요?
-            <button type="button" class="text-button"
-                data-go="register">
-                회원가입
-            </button>
+                아직 회원이 아니신가요?
+                <button type="button" class="text-button" data-go="register">회원가입</button>
             </p>
 
-            <button type="button" class="back-button"
-            data-go="home">
-            ← 처음으로
-            </button>
+            <button type="button" class="back-button" data-go="home">← 처음으로</button>
         </div>
-        </section>
+    </section>
 
-        <!-- 회원가입 화면 -->
-        <section id="register-screen" class="screen" hidden>
-        <div class="form-panel">
+    <!-- 3. 회원가입 화면 -->
+    <section id="register-screen" class="screen" hidden>
+        <div class="form-panel has-icon">
+            <svg class="panel-icon round" viewBox="0 0 100 100" aria-hidden="true">
+                <circle cx="50" cy="50" r="45" fill="none" stroke="#d8b8ff" stroke-width="7"/>
+                <circle cx="50" cy="38" r="15" fill="#d8b8ff"/>
+                <path d="M20 79 Q22 58 50 58 Q78 58 80 79 A43 43 0 0 1 20 79 Z" fill="#d8b8ff"/>
+            </svg>
+
             <h2>회원가입</h2>
-            <p class="form-description">
-            우리만의 추억을 시작해 보세요.
-            </p>
 
             <form id="register-form">
-            <label for="register-nickname">닉네임</label>
-            <input
-                id="register-nickname"
-                name="nickname"
-                type="text"
-                placeholder="사용할 닉네임"
-                autocomplete="nickname"
-                required
-            >
+                <input id="register-nickname" name="nickname" type="text"
+                    placeholder="닉네임" aria-label="닉네임"
+                    maxlength="50" autocomplete="nickname" required>
 
-            <label for="register-email">이메일</label>
-            <input
-                id="register-email"
-                name="email"
-                type="email"
-                placeholder="이메일을 입력하세요"
-                autocomplete="email"
-                required
-            >
+                <input id="register-email" name="email" type="email"
+                    placeholder="이메일" aria-label="이메일"
+                    autocomplete="email" required>
 
-            <label for="register-password">비밀번호</label>
-            <input
-                id="register-password"
-                name="password"
-                type="password"
-                placeholder="비밀번호 8자 이상"
-                minlength="8"
-                autocomplete="new-password"
-                required
-            >
+                <input id="register-password" name="password" type="password"
+                    placeholder="비밀번호 (8자 이상)" aria-label="비밀번호"
+                    minlength="8" autocomplete="new-password" required>
 
-            <button type="submit" class="primary-button">
-                회원가입
-            </button>
+                <button type="submit" class="primary-button">회원가입</button>
             </form>
 
             <p class="form-footer">
-            이미 회원이신가요?
-            <button type="button" class="text-button"
-                data-go="login">
-                로그인
-            </button>
+                이미 회원이신가요?
+                <button type="button" class="text-button" data-go="login">로그인</button>
             </p>
 
-            <button type="button" class="back-button"
-            data-go="home">
-            ← 처음으로
-            </button>
+            <button type="button" class="back-button" data-go="home">← 처음으로</button>
         </div>
-        </section>
-    <!-- 로그인 후 화면 -->
-        <section id="dashboard-screen" class="screen" hidden>
-    <div class="form-panel">
-        <h2>Time Remember</h2>
-        <p id="welcome-message" class="form-description">
-        환영합니다!
-        </p>
-
-        <h3>새로운 친구 방 만들기</h3>
-        <form id="create-room-form">
-        <label for="room-name">방 이름</label>
-        <input
-            id="room-name"
-            name="room_name"
-            maxlength="100"
-            placeholder="예: 우리들의 추억"
-            required
-        >
-
-        <label for="room-description">방 설명</label>
-        <input
-            id="room-description"
-            name="description"
-            maxlength="500"
-            placeholder="방에 대한 간단한 설명"
-        >
-
-        <button type="submit" class="primary-button">
-            방 만들기
-        </button>
-        </form>
-
-        <hr>
-
-        <h3>초대 코드로 참여하기</h3>
-        <form id="join-room-form">
-        <label for="invite-code">초대 코드</label>
-        <input
-            id="invite-code"
-            name="invite_code"
-            placeholder="초대 코드를 입력하세요"
-            required
-        >
-
-        <button type="submit" class="primary-button">
-            방 참여하기
-        </button>
-        </form>
-
-        <hr>
-
-        <h3>내 친구 방</h3>
-        <button type="button" id="refresh-rooms-button">
-        방 목록 새로고침
-        </button>
-        <div id="room-list"></div>
-
-        <button type="button" id="logout-button" class="primary-button">
-        로그아웃
-        </button>
-    </div>
     </section>
-    <!-- 약속 화면 -->
-    <section id="appointments-screen" class="screen" hidden>
-    <div class="form-panel">
-        <h2 id="appointment-room-title">친구 방</h2>
-        <p class="form-description">우리의 다음 만남을 계획해 보세요.</p>
 
-        <form id="appointment-form">
-        <label for="appointment-title">약속 제목</label>
-        <input
-            id="appointment-title"
-            name="title"
-            maxlength="200"
-            placeholder="예: 주말에 영화 보기"
-            required
-        >
+    <!-- 4~7. 로그인 이후 화면 (Home / Room / Calender / Picture) -->
+    <section id="main-screen" class="screen app-screen" hidden>
 
-        <label for="appointment-date">날짜와 시간</label>
-        <input
-            id="appointment-date"
-            name="start_at"
-            type="datetime-local"
-            required
-        >
+        <header class="topbar">
+            <button type="button" id="menu-button" class="menu-button" aria-label="메뉴" aria-expanded="false">
+                <svg viewBox="0 0 30 24" width="30" height="24" aria-hidden="true">
+                    <path d="M1 3 H29 M1 12 H29 M1 21 H29" stroke="#000" stroke-width="3" stroke-linecap="round"/>
+                </svg>
+            </button>
 
-        <label for="appointment-place">장소</label>
-        <input
-            id="appointment-place"
-            name="place"
-            maxlength="255"
-            placeholder="예: 강남역"
-            required
-        >
+            <nav class="tabs" aria-label="메인 메뉴">
+                <button type="button" class="tab active" data-tab="home">Home</button>
+                <button type="button" class="tab" data-tab="room">Room</button>
+                <button type="button" class="tab" data-tab="calendar">Calender</button>
+                <button type="button" class="tab" data-tab="picture">Picture</button>
+            </nav>
+        </header>
 
-        <label for="appointment-description">설명</label>
-        <textarea
-            id="appointment-description"
-            name="description"
-            maxlength="2000"
-            rows="3"
-            placeholder="추가로 기록할 내용"
-        ></textarea>
+        <div id="menu-panel" class="menu-panel" hidden>
+            <p id="menu-user" class="menu-user"></p>
+            <button type="button" id="menu-logout" class="menu-logout">로그아웃</button>
+        </div>
 
-        <button type="submit" class="primary-button">
-            약속 등록하기
-        </button>
-        </form>
+        <div class="tab-panels">
 
-        <hr>
+            <!-- Home: 내 방 목록 + 방 만들기(+) + 코드로 참여 -->
+            <div id="tab-home" class="tab-panel">
+                <div id="house-row" class="house-row">
+                    <button type="button" id="create-room-button" class="plus-button" aria-label="방 만들기">
+                        <svg viewBox="0 0 50 50" width="50" height="50" aria-hidden="true">
+                            <path d="M25 4 V46 M4 25 H46" stroke="#868686" stroke-width="5.5" stroke-linecap="round"/>
+                        </svg>
+                    </button>
+                </div>
 
-        <h3>등록된 약속</h3>
-        <div id="appointment-list"></div>
+                <form id="join-form" class="join-form">
+                    <label for="join-code" class="join-label">공유받은 코드로 참여하기</label>
+                    <div class="join-row">
+                        <input id="join-code" type="text" maxlength="12"
+                            placeholder="초대 코드 입력" autocomplete="off"
+                            autocapitalize="characters" spellcheck="false">
+                        <button type="submit" class="primary-button">참여</button>
+                    </div>
+                </form>
+            </div>
 
-        <button type="button" id="back-to-rooms" class="back-button">
-        ← 친구 방으로 돌아가기
-        </button>
-    </div>
+            <!-- Room: 랜덤 코드 + 초대 링크 창 -->
+            <div id="tab-room" class="tab-panel" hidden>
+                <p id="room-empty" class="empty-hint">Home에서 방을 만들거나 선택해 주세요.</p>
+
+                <div id="share-modal" class="modal-card" hidden>
+                    <button type="button" id="modal-close" class="modal-close" aria-label="닫기">X</button>
+
+                    <p class="modal-label">랜덤 코드</p>
+                    <div class="yellow-box"><span id="share-code">------</span></div>
+                    <button type="button" id="copy-code" class="copy-button">코드 복사</button>
+
+                    <p class="modal-label">초대 링크</p>
+                    <div class="yellow-box link"><span id="share-link"></span></div>
+                    <button type="button" id="copy-link" class="copy-button">링크 복사</button>
+                </div>
+            </div>
+
+            <!-- Calender: 되는 날짜 선택 -->
+            <div id="tab-calendar" class="tab-panel" hidden>
+                <p id="calendar-empty" class="empty-hint">Home에서 방을 만들거나 선택해 주세요.</p>
+
+                <div id="calendar-area" hidden>
+                    <p class="cal-hint">
+                        되는 날짜를 눌러 선택하세요.<br>
+                        모두 되는 날은 노랗게 표시돼요.
+                    </p>
+
+                    <div class="polaroid">
+                        <div class="cal-sheet">
+                            <div class="cal-box">
+                                <div class="cal-head">
+                                    <button type="button" id="cal-prev" class="cal-arrow" aria-label="이전 달">‹</button>
+                                    <h3 class="cal-title"><span id="cal-month">OCTOBER</span> <small id="cal-year"></small></h3>
+                                    <button type="button" id="cal-next" class="cal-arrow" aria-label="다음 달">›</button>
+                                </div>
+                                <div class="cal-rule"></div>
+
+                                <div class="cal-grid cal-weekdays" aria-hidden="true">
+                                    <span>M</span><span>T</span><span>W</span><span>T</span><span>F</span><span>S</span><span>S</span>
+                                </div>
+                                <div id="cal-days" class="cal-grid"></div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <ul id="cal-legend" class="legend"></ul>
+                </div>
+            </div>
+
+            <!-- Picture: 방 사진 -->
+            <div id="tab-picture" class="tab-panel" hidden>
+                <p id="picture-empty" class="empty-hint">Home에서 방을 만들거나 선택해 주세요.</p>
+
+                <div id="picture-area" hidden>
+                    <div class="photo-toolbar">
+                        <button type="button" id="photo-add" class="primary-button">+ 사진 올리기</button>
+                        <input id="photo-input" type="file" accept="image/jpeg,image/png,image/webp" hidden>
+                    </div>
+
+                    <div class="polaroid">
+                        <div class="cal-sheet">
+                            <p id="photo-empty" class="photo-empty">아직 올린 사진이 없어요.</p>
+                            <div id="photo-grid" class="photo-grid"></div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+        </div>
     </section>
-    </main>
-    </body>
-    </html>
+
+</main>
+
+<div id="toast" class="toast" role="status" aria-live="polite"></div>
+</body>
+</html>

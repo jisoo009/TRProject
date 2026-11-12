@@ -1,42 +1,1048 @@
-    .form-panel h3 {
-    margin: 24px 0 12px;
-    font-size: 16px;
-    }
+/* Time Remember - Pastel Cloud Theme
+   index.html의 클래스와 ID를 유지하면서 디자인만 적용합니다. */
 
-    .form-panel hr {
-    margin: 24px 0;
-    border: 0;
-    border-top: 1px solid #ded9e7;
-    }
+@import url('https://fonts.googleapis.com/css2?family=Jua&family=Noto+Sans+KR:wght@400;500;600;700&display=swap');
 
-    #room-list {
+:root {
+    --lavender: #d8b8ff;
+    --lavender-deep: #9872cf;
+    --lavender-dark: #7655aa;
+    --sky: #d1eaff;
+    --sky-deep: #b9dcfa;
+    --butter: #fffd90;
+    --ink: #343044;
+    --muted: #89849b;
+    --white: #ffffff;
+    --card: rgba(255, 255, 255, 0.58);
+    --line: #d9d5e8;
+    --shadow: 0 8px 22px rgba(104, 91, 153, 0.13);
+}
+
+* {
+    box-sizing: border-box;
+}
+
+html {
+    min-height: 100%;
+    background: var(--lavender);
+}
+
+body {
+    min-height: 100vh;
+    margin: 0;
+    padding: 28px 16px;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    color: var(--ink);
+    font-family: "Noto Sans KR", sans-serif;
+    background:
+        radial-gradient(circle at 8% 8%, rgba(255,255,255,.42) 0 7%, transparent 7.2%),
+        linear-gradient(135deg, #dfc5ff 0%, #d8c1ff 48%, #cdb4f4 100%);
+}
+
+button,
+input,
+textarea {
+    font: inherit;
+}
+
+button {
+    cursor: pointer;
+}
+
+button:focus-visible,
+input:focus-visible,
+textarea:focus-visible {
+    outline: 3px solid rgba(152, 114, 207, 0.35);
+    outline-offset: 3px;
+}
+
+.app {
+    width: min(100%, 520px);
+    min-height: min(820px, calc(100vh - 56px));
+    position: relative;
+    isolation: isolate;
+}
+
+/* 모든 화면의 공통 바탕 */
+.screen {
+    position: relative;
+    min-height: min(820px, calc(100vh - 56px));
+    padding: 44px 30px;
+    overflow: hidden;
+    border: 1px solid rgba(255,255,255,.75);
+    border-radius: 30px;
+    background:
+        radial-gradient(ellipse at 0% 0%, #fff 0 11%, transparent 11.2%),
+        radial-gradient(ellipse at 100% 100%, #fff 0 13%, transparent 13.2%),
+        linear-gradient(145deg, #d9edff 0%, #cce6ff 100%);
+    box-shadow: 0 18px 45px rgba(91, 70, 139, .17);
+}
+
+/* 구름 장식 */
+.screen::before,
+.screen::after {
+    content: "";
+    position: absolute;
+    z-index: -1;
+    pointer-events: none;
+    background: rgba(255,255,255,.94);
+    filter: drop-shadow(0 4px 8px rgba(255,255,255,.12));
+}
+
+.screen::before {
+    width: 190px;
+    height: 112px;
+    top: -55px;
+    left: -42px;
+    border-radius: 48% 52% 55% 45% / 55% 45% 55% 45%;
+    box-shadow:
+        42px 23px 0 -8px rgba(255,255,255,.94),
+        83px 2px 0 -15px rgba(255,255,255,.94);
+}
+
+.screen::after {
+    width: 180px;
+    height: 105px;
+    right: -55px;
+    bottom: -48px;
+    border-radius: 55% 45% 48% 52% / 45% 55% 45% 55%;
+    box-shadow:
+        -43px -20px 0 -8px rgba(255,255,255,.94),
+        -88px -3px 0 -16px rgba(255,255,255,.94);
+}
+
+.screen[hidden] {
+    display: none !important;
+}
+
+/* 시작 화면 */
+.home-screen {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    text-align: center;
+}
+
+.home-content {
+    width: 100%;
+    max-width: 370px;
     display: flex;
     flex-direction: column;
-    gap: 12px;
-    margin-top: 16px;
-    }
+    align-items: center;
+    padding: 30px 0 12px;
+}
 
-    .room-card {
-    padding: 14px;
-    border: 1px solid #ded9e7;
-    border-radius: 12px;
-    background: #ffffff;
-    }
+.eyebrow {
+    margin: 0 0 12px;
+    color: var(--lavender-dark);
+    font-size: 12px;
+    font-weight: 700;
+    letter-spacing: .2em;
+}
 
-    .room-card h4 {
-    margin: 0 0 8px;
-    }
+.home-content h1 {
+    margin: 0;
+    color: #29243b;
+    font-family: "Jua", "Noto Sans KR", sans-serif;
+    font-size: clamp(42px, 10vw, 64px);
+    line-height: 1.12;
+    letter-spacing: -.045em;
+    text-shadow: 2px 3px 0 rgba(255,255,255,.65);
+}
 
-    .room-card p {
-    margin: 4px 0;
+.description {
+    margin: 18px 0 0;
+    color: #71658f;
+    font-size: 15px;
+    font-weight: 500;
+    line-height: 1.8;
+}
+
+.memory-placeholder {
+    width: min(230px, 72%);
+    aspect-ratio: 1.12 / 1;
+    margin: 42px auto 36px;
+    display: grid;
+    place-items: center;
+    position: relative;
+    transform: rotate(-5deg);
+    border: 10px solid rgba(255,255,255,.94);
+    border-bottom-width: 34px;
+    border-radius: 9px;
+    background:
+        linear-gradient(rgba(173, 202, 246, .12), rgba(173, 202, 246, .12)),
+        radial-gradient(circle at 70% 30%, #fff 0 9%, transparent 9.5%),
+        linear-gradient(145deg, #c6dcff, #e8ddff);
+    box-shadow: 0 9px 17px rgba(93, 83, 139, .18);
+}
+
+.memory-placeholder::before {
+    content: "♡";
+    position: absolute;
+    top: -27px;
+    right: -30px;
+    color: var(--lavender-deep);
+    font-size: 44px;
+    transform: rotate(12deg);
+}
+
+.memory-placeholder span {
+    color: rgba(104, 89, 151, .7);
+    font-family: "Jua", sans-serif;
+    font-size: 18px;
+    line-height: 1.15;
+    letter-spacing: .08em;
+}
+
+.primary-button {
+    min-height: 52px;
+    width: 100%;
+    padding: 13px 22px;
+    border: 0;
+    border-radius: 999px;
+    color: #51466d;
+    background: var(--butter);
+    box-shadow: 0 5px 0 rgba(206, 194, 91, .25), 0 8px 16px rgba(91, 78, 133, .12);
+    font-family: "Jua", "Noto Sans KR", sans-serif;
+    font-size: 17px;
+    font-weight: 400;
+    transition: transform .18s ease, box-shadow .18s ease, filter .18s ease;
+}
+
+.home-content > .primary-button {
+    width: min(100%, 300px);
+    min-height: 58px;
+    margin-top: 2px;
+    font-size: 19px;
+}
+
+.primary-button:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 7px 0 rgba(206, 194, 91, .2), 0 11px 20px rgba(91, 78, 133, .15);
+    filter: saturate(1.04);
+}
+
+.primary-button:active {
+    transform: translateY(2px);
+    box-shadow: 0 2px 0 rgba(206, 194, 91, .2);
+}
+
+/* 로그인 / 회원가입 카드 */
+.form-panel {
+    width: 100%;
+    max-width: 410px;
+    margin: 0 auto;
+    padding: 34px 28px 27px;
+    position: relative;
+    border: 1px solid rgba(255,255,255,.72);
+    border-radius: 30px;
+    background: var(--card);
+    box-shadow: var(--shadow);
+    backdrop-filter: blur(12px);
+    -webkit-backdrop-filter: blur(12px);
+}
+
+#login-screen,
+#register-screen {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.form-panel h2 {
+    margin: 0;
+    color: #4f426c;
+    text-align: center;
+    font-family: "Jua", "Noto Sans KR", sans-serif;
+    font-size: 32px;
+    font-weight: 400;
+    letter-spacing: -.03em;
+}
+
+.form-description {
+    margin: 10px 0 27px;
+    color: #81749e;
+    text-align: center;
+    font-size: 14px;
+    line-height: 1.7;
+}
+
+#login-form,
+#register-form,
+#create-room-form,
+#join-room-form,
+#appointment-form {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+}
+
+.form-panel label {
+    margin: 7px 2px 0;
+    color: #6c6282;
     font-size: 13px;
-    overflow-wrap: anywhere;
-    }
+    font-weight: 600;
+}
 
-    .room-card button {
-    margin-top: 10px;
+.form-panel input,
+.form-panel textarea {
+    width: 100%;
+    min-height: 48px;
+    padding: 12px 16px;
+    border: 1px solid #d9d8e8;
+    border-radius: 999px;
+    color: var(--ink);
+    background: rgba(255,255,255,.76);
+    box-shadow: 0 3px 6px rgba(86, 77, 124, .06);
+    font-size: 14px;
+    transition: border-color .18s ease, box-shadow .18s ease, background .18s ease;
+}
+
+.form-panel textarea {
+    min-height: 100px;
+    border-radius: 18px;
+    resize: vertical;
+}
+
+.form-panel input::placeholder,
+.form-panel textarea::placeholder {
+    color: #aaa5bb;
+}
+
+.form-panel input:focus,
+.form-panel textarea:focus {
+    border-color: #b99ae9;
+    outline: none;
+    background: #fff;
+    box-shadow: 0 0 0 4px rgba(185, 154, 233, .16);
+}
+
+#login-form .primary-button,
+#register-form .primary-button,
+#create-room-form .primary-button,
+#join-room-form .primary-button,
+#appointment-form .primary-button {
+    margin-top: 14px;
+}
+
+.form-footer {
+    margin: 23px 0 0;
+    color: #8b849b;
+    text-align: center;
+    font-size: 13px;
+}
+
+.text-button {
+    padding: 3px 5px;
+    border: 0;
+    color: var(--lavender-dark);
+    background: transparent;
+    font-weight: 700;
+}
+
+.text-button:hover {
+    color: #6842a5;
+    text-decoration: underline;
+}
+
+.back-button {
+    display: block;
+    margin: 17px auto 0;
     padding: 8px 12px;
     border: 0;
-    border-radius: 8px;
-    background: #e8dcff;
+    color: #9389a8;
+    background: transparent;
+    font-size: 13px;
+}
+
+.back-button:hover {
+    color: var(--lavender-dark);
+}
+
+/* 로그인 이후 대시보드와 약속 화면도 같은 디자인으로 통일 */
+#dashboard-screen,
+#appointments-screen {
+    display: flex;
+    align-items: flex-start;
+    justify-content: center;
+    overflow-y: auto;
+}
+
+#dashboard-screen .form-panel,
+#appointments-screen .form-panel {
+    margin: auto;
+}
+
+.form-panel h3 {
+    margin: 25px 0 12px;
+    color: #5c4d7a;
+    font-family: "Jua", "Noto Sans KR", sans-serif;
+    font-size: 20px;
+    font-weight: 400;
+}
+
+.form-panel hr {
+    height: 1px;
+    margin: 25px 0;
+    border: 0;
+    background: rgba(145, 127, 181, .2);
+}
+
+#room-list,
+#appointment-list {
+    display: grid;
+    gap: 12px;
+    margin: 14px 0;
+}
+
+#refresh-rooms-button {
+    width: 100%;
+    min-height: 44px;
+    border: 1px solid #d8c9ef;
+    border-radius: 999px;
+    color: #725b99;
+    background: rgba(255,255,255,.7);
+    font-weight: 600;
+}
+
+#logout-button {
+    margin-top: 24px;
+}
+
+@media (max-width: 520px) {
+    body {
+        padding: 0;
+        align-items: stretch;
+        background: var(--sky);
     }
+
+    .app,
+    .screen {
+        width: 100%;
+        min-height: 100vh;
+        border-radius: 0;
+    }
+
+    .screen {
+        padding: 34px 22px;
+    }
+
+    .form-panel {
+        padding: 30px 22px 24px;
+        border-radius: 26px;
+    }
+
+    .home-content {
+        padding-top: 20px;
+    }
+}
+
+@media (max-height: 700px) and (min-width: 521px) {
+    body {
+        align-items: flex-start;
+    }
+
+    .app,
+    .screen {
+        min-height: 700px;
+    }
+}
+
+@media (prefers-reduced-motion: reduce) {
+    *,
+    *::before,
+    *::after {
+        scroll-behavior: auto !important;
+        transition-duration: .01ms !important;
+        animation-duration: .01ms !important;
+    }
+}
+
+
+/* =====================================================================
+   Save Memories - 시안 화면 추가 스타일
+   위쪽의 기존 디자인 규칙은 그대로 두고, 새 화면에 필요한 것만 아래에 추가합니다.
+   ===================================================================== */
+
+[hidden] {
+    display: none !important;
+}
+
+/* ---------- 시작 화면 ---------- */
+#home-screen .home-content {
+    min-height: min(640px, 72vh);
+    justify-content: space-between;
+    padding: 0;
+}
+
+.home-content h1.brand-title {
+    margin: auto 0;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    font-family: inherit;
+    font-weight: 400;
+    letter-spacing: 0;
+    line-height: 1;
+    text-shadow: none;
+}
+
+.brand-save {
+    font-family: "Cormorant Garamond", Georgia, serif;
+    font-size: clamp(72px, 19vw, 96px);
+    font-weight: 600;
+    letter-spacing: .02em;
+    color: #000;
+}
+
+.brand-memories {
+    margin-top: 6px;
+    font-family: "Noto Sans KR", sans-serif;
+    font-size: clamp(48px, 12.5vw, 64px);
+    font-weight: 500;
+    letter-spacing: -.01em;
+    color: #000;
+    transform: rotate(2.5deg);
+}
+
+/* ---------- 로그인 / 회원가입 (카드 위에 걸친 아이콘) ---------- */
+.form-panel.has-icon {
+    margin-top: 76px;
+    padding-top: 66px;
+}
+
+.panel-icon {
+    position: absolute;
+    top: -58px;
+    left: 50%;
+    width: 128px;
+    height: 108px;
+    transform: translateX(-50%);
+    overflow: visible;
+}
+
+.panel-icon.round {
+    top: -52px;
+    width: 104px;
+    height: 104px;
+}
+
+.form-panel.has-icon h2 {
+    font-family: "Noto Sans KR", sans-serif;
+    font-size: 36px;
+    font-weight: 400;
+    color: #000;
+}
+
+.form-panel.has-icon form {
+    margin-top: 34px;
+}
+
+/* ---------- 로그인 이후 공통 틀 ---------- */
+#main-screen {
+    display: flex;
+    flex-direction: column;
+    padding: 0;
+    background: #fff;
+}
+
+#main-screen::before,
+#main-screen::after {
+    display: none;
+}
+
+.topbar {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    min-height: 66px;
+    padding: 0 16px;
+    background: #8ccbff;
+    position: relative;
+    z-index: 2;
+}
+
+.menu-button {
+    flex: none;
+    width: 44px;
+    height: 44px;
+    padding: 0;
+    border: 0;
+    background: transparent;
+    display: grid;
+    place-items: center;
+}
+
+.tabs {
+    flex: 1;
+    display: flex;
+    justify-content: space-around;
+    gap: 4px;
+}
+
+.tab {
+    padding: 8px 6px;
+    border: 0;
+    background: transparent;
+    color: #000;
+    font-family: "Noto Sans KR", sans-serif;
+    font-size: 15px;
+    font-weight: 500;
+    text-decoration: underline;
+    text-decoration-color: transparent;
+    text-decoration-thickness: 4px;
+    text-underline-offset: 3px;
+}
+
+.tab.active {
+    text-decoration-color: #fffd90;
+}
+
+.menu-panel {
+    position: absolute;
+    top: 62px;
+    left: 12px;
+    z-index: 5;
+    min-width: 170px;
+    padding: 14px 16px;
+    border-radius: 16px;
+    background: #fff;
+    box-shadow: 0 10px 26px rgba(70, 110, 160, .25);
+}
+
+.menu-user {
+    margin: 0 0 10px;
+    font-weight: 600;
+    color: #4f426c;
+    font-size: 14px;
+}
+
+.menu-logout {
+    width: 100%;
+    padding: 9px 12px;
+    border: 0;
+    border-radius: 999px;
+    background: var(--butter);
+    color: #51466d;
+    font-weight: 600;
+    font-size: 14px;
+}
+
+.tab-panels {
+    flex: 1;
+    overflow-y: auto;
+}
+
+.tab-panel {
+    padding: 30px 26px 48px;
+}
+
+.empty-hint {
+    margin: 70px 0 0;
+    text-align: center;
+    color: #89849b;
+    font-size: 14px;
+}
+
+/* ---------- Home ---------- */
+.house-row {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: flex-start;
+    gap: 22px 22px;
+}
+
+.house {
+    width: 92px;
+    padding: 0;
+    border: 0;
+    background: transparent;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 6px;
+    color: #51466d;
+    transition: transform .15s ease;
+}
+
+.house:hover {
+    transform: translateY(-2px);
+}
+
+.house svg {
+    width: 92px;
+    height: 92px;
+}
+
+.house.current .house-name {
+    font-weight: 700;
+    text-decoration: underline;
+    text-decoration-color: #fffd90;
+    text-decoration-thickness: 4px;
+    text-underline-offset: 2px;
+}
+
+.house-name {
+    max-width: 92px;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+    font-size: 12px;
+}
+
+.plus-button {
+    width: 92px;
+    height: 92px;
+    padding: 0;
+    border: 0;
+    background: transparent;
+    display: grid;
+    place-items: center;
+    margin-top: 0;
+}
+
+.plus-button:hover svg {
+    transform: scale(1.08);
+}
+
+.plus-button svg {
+    transition: transform .15s ease;
+}
+
+.join-form {
+    margin-top: 56px;
+    max-width: 380px;
+}
+
+.join-label {
+    display: block;
+    margin: 0 4px 8px;
+    color: #6c6282;
+    font-size: 13px;
+    font-weight: 600;
+}
+
+.join-row {
+    display: flex;
+    gap: 10px;
+}
+
+.join-row input {
+    flex: 1;
+    min-width: 0;
+    min-height: 46px;
+    padding: 0 18px;
+    border: 1px solid #d9d8e8;
+    border-radius: 999px;
+    background: rgba(255, 255, 255, .9);
+    box-shadow: 0 3px 6px rgba(86, 77, 124, .06);
+    font-size: 14px;
+    letter-spacing: .08em;
+    text-transform: uppercase;
+}
+
+.join-row input::placeholder {
+    letter-spacing: 0;
+    text-transform: none;
+    color: #aaa5bb;
+}
+
+.join-row .primary-button {
+    width: auto;
+    min-height: 46px;
+    padding: 0 24px;
+    font-size: 15px;
+}
+
+/* ---------- Room: 랜덤 코드 / 링크 창 ---------- */
+.modal-card {
+    position: relative;
+    width: min(100%, 380px);
+    margin: 56px auto 0;
+    padding: 50px 28px 34px;
+    border-radius: 16px;
+    background: #8ccbff;
+    display: flex;
+    flex-direction: column;
+    align-items: stretch;
+    gap: 10px;
+    box-shadow: 0 10px 26px rgba(70, 110, 160, .22);
+}
+
+.modal-close {
+    position: absolute;
+    top: 12px;
+    right: 18px;
+    padding: 6px;
+    border: 0;
+    background: transparent;
+    color: #000;
+    font-size: 18px;
+}
+
+.modal-label {
+    margin: 8px 0 0;
+    color: #28465f;
+    font-size: 13px;
+    font-weight: 600;
+}
+
+.yellow-box {
+    padding: 18px 14px;
+    background: #ffffa8;
+    color: #000;
+    text-align: center;
+    font-size: 28px;
+    font-weight: 500;
+    letter-spacing: .16em;
+    overflow: hidden;
+}
+
+.yellow-box.link {
+    padding: 14px;
+    font-size: 13px;
+    letter-spacing: 0;
+    white-space: nowrap;
+    text-overflow: ellipsis;
+}
+
+.yellow-box.link span {
+    display: block;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+.copy-button {
+    align-self: center;
+    padding: 8px 20px;
+    border: 0;
+    border-radius: 999px;
+    background: #fff;
+    color: #2f6a9f;
+    font-size: 13px;
+    font-weight: 700;
+}
+
+/* ---------- Calender / Picture: 노란 액자 ---------- */
+.cal-hint {
+    margin: 4px 0 26px;
+    text-align: center;
+    color: #6f87a3;
+    font-size: 13px;
+    line-height: 1.7;
+}
+
+.polaroid {
+    width: min(100%, 380px);
+    margin: 0 auto;
+    padding: 31px 7px 46px;
+    background: #fffd90;
+}
+
+.cal-sheet {
+    padding: 22px 20px;
+    background: #fff;
+}
+
+.cal-box {
+    padding: 22px 12px 20px;
+    border: 1.5px solid #1e2440;
+    font-family: "Cormorant Garamond", Georgia, serif;
+    color: #111;
+}
+
+.cal-head {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 10px;
+}
+
+.cal-title {
+    margin: 0;
+    font-size: 30px;
+    font-weight: 500;
+    letter-spacing: .06em;
+    text-align: center;
+    line-height: 1.1;
+}
+
+.cal-title small {
+    display: block;
+    font-size: 14px;
+    letter-spacing: .2em;
+    color: #6b6f86;
+}
+
+.cal-arrow {
+    width: 30px;
+    height: 30px;
+    padding: 0;
+    border: 0;
+    background: transparent;
+    color: #1e2440;
+    font-family: Georgia, serif;
+    font-size: 28px;
+    line-height: 1;
+}
+
+.cal-arrow:hover {
+    color: #4b86bd;
+}
+
+.cal-rule {
+    height: 1px;
+    margin: 12px auto 16px;
+    background: #1e2440;
+}
+
+.cal-grid {
+    display: grid;
+    grid-template-columns: repeat(7, 1fr);
+    row-gap: 4px;
+    text-align: center;
+}
+
+.cal-weekdays {
+    margin-bottom: 8px;
+}
+
+.cal-weekdays span {
+    font-size: 16px;
+    font-weight: 600;
+    color: #1e2440;
+}
+
+.day {
+    min-height: 46px;
+    padding: 4px 0 0;
+    border: 0;
+    border-radius: 8px;
+    background: transparent;
+    color: #111;
+    font-family: "Cormorant Garamond", Georgia, serif;
+    font-size: 18px;
+    font-weight: 600;
+    line-height: 22px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    cursor: pointer;
+}
+
+.day.empty {
+    cursor: default;
+}
+
+.day:not(.empty):hover {
+    background: rgba(140, 203, 255, .2);
+}
+
+.day.all {
+    background: rgba(255, 253, 144, .7);
+}
+
+.bars {
+    margin-top: 2px;
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+}
+
+.bar {
+    display: block;
+    width: 18px;
+    height: 3px;
+    border-radius: 2px;
+}
+
+.legend {
+    margin: 26px 0 0;
+    padding: 0;
+    list-style: none;
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: center;
+    gap: 8px 18px;
+    font-size: 13px;
+    color: #51466d;
+}
+
+.legend i {
+    display: inline-block;
+    width: 18px;
+    height: 4px;
+    margin-right: 6px;
+    border-radius: 2px;
+    vertical-align: middle;
+}
+
+/* ---------- Picture ---------- */
+.photo-toolbar {
+    display: flex;
+    justify-content: center;
+    margin-bottom: 22px;
+}
+
+.photo-toolbar .primary-button {
+    width: auto;
+    min-height: 46px;
+    padding: 0 26px;
+    font-size: 15px;
+}
+
+.photo-grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 6px;
+}
+
+.photo-grid img {
+    display: block;
+    width: 100%;
+    aspect-ratio: 1;
+    object-fit: cover;
+    background: #eef5fc;
+}
+
+.photo-empty {
+    margin: 30px 0;
+    text-align: center;
+    color: #89849b;
+    font-size: 13px;
+}
+
+/* ---------- 알림 ---------- */
+.toast {
+    position: fixed;
+    left: 50%;
+    bottom: 36px;
+    z-index: 50;
+    max-width: 90vw;
+    padding: 10px 20px;
+    border-radius: 999px;
+    background: rgba(52, 48, 68, .92);
+    color: #fff;
+    font-size: 13px;
+    opacity: 0;
+    pointer-events: none;
+    transform: translate(-50%, 10px);
+    transition: opacity .2s ease, transform .2s ease;
+}
+
+.toast.show {
+    opacity: 1;
+    transform: translate(-50%, 0);
+}
+
+@media (max-width: 520px) {
+    #main-screen {
+        padding: 0;
+    }
+
+    .tab-panel {
+        padding: 26px 20px 40px;
+    }
+}

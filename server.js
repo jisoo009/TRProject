@@ -6,6 +6,7 @@ const session = require("express-session");
 const path = require("path");
 
 const { uploadDir } = require("./config/upload");
+const pool = require("./db");
 
 const app = express();
 const PORT = 3000;
@@ -78,7 +79,14 @@ app.use((error, req, res, next) => {
     });
 });
 
-// 서버 실행
-app.listen(PORT, () => {
-    console.log(`서버 실행 주소: http://localhost:${PORT}`);
-});
+// 서버 실행 (테이블 준비가 끝난 뒤에 시작)
+pool.initTables()
+    .then(() => {
+        app.listen(PORT, () => {
+            console.log(`서버 실행 주소: http://localhost:${PORT}`);
+        });
+    })
+    .catch((error) => {
+        console.error("DB 초기화 실패 (.env의 DB 설정을 확인해 주세요):", error.message);
+        process.exit(1);
+    });
