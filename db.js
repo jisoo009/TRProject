@@ -72,6 +72,28 @@ async function createTables() {
         ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4
     `);
 
+    // 날짜별 사진 폴더
+    await pool.query(`
+        CREATE TABLE IF NOT EXISTS photo_folders (
+            folder_id INT AUTO_INCREMENT PRIMARY KEY,
+            room_id INT NOT NULL,
+            creator_user_id INT NOT NULL,
+            name VARCHAR(100) NOT NULL,
+            folder_date DATE NULL,
+            note VARCHAR(500) NOT NULL DEFAULT '',
+            created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+            KEY idx_folder_room (room_id)
+        ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4
+    `);
+
+    await pool.query(`
+        CREATE TABLE IF NOT EXISTS photo_likes (
+            photo_id INT NOT NULL,
+            user_id INT NOT NULL,
+            PRIMARY KEY (photo_id, user_id)
+        ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4
+    `);
+
     await pool.query(`
         CREATE TABLE IF NOT EXISTS photos (
             photo_id INT AUTO_INCREMENT PRIMARY KEY,
@@ -145,8 +167,17 @@ async function migrateLegacySchema() {
     }
 }
 
+async function migratePhotos() {
+    const photos = await columnsOf("photos");
+
+    if (!photos.has("folder_id")) {
+        await runMigration("photos.folder_id 추가", "ALTER TABLE photos ADD COLUMN folder_id INT NULL");
+    }
+}
+
 async function initTables() {
     await createTables();
+    await migratePhotos();
     await migrateLegacySchema();
 }
 

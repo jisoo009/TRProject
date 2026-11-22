@@ -1,7 +1,10 @@
 const express = require("express");
 const crypto = require("crypto");
+const fs = require("fs");
+const path = require("path");
 const pool = require("../db");
 const requireLogin = require("../middleware/auth");
+const { uploadDir } = require("../config/upload");
 
 const router = express.Router();
 
@@ -67,7 +70,8 @@ router.get("/rooms", requireLogin, async (req, res) => {
         const [rooms] = await pool.query(
             `SELECT r.room_id,
                     IF(r.room_name = '', CONCAT('방 ', r.invite_code), r.room_name) AS room_name,
-                    r.invite_code, rm.role, r.created_at
+                    r.invite_code, rm.role, r.created_at,
+                    (SELECT COUNT(*) FROM room_members c WHERE c.room_id = r.room_id) AS member_count
             FROM rooms r
             JOIN room_members rm ON r.room_id = rm.room_id
             WHERE rm.user_id = ?
@@ -243,7 +247,10 @@ router.get("/rooms/:roomId", requireLogin, async (req, res) => {
         });
 
         res.json({
-            room: rooms[0],
+            room: {
+                ...rooms[0],
+                room_name: rooms[0].room_name || `방 ${rooms[0].invite_code}`
+            },
             members: members.map((member, index) => ({
                 user_id: member.user_id,
                 nickname: member.nickname,
@@ -307,6 +314,100 @@ router.put("/rooms/:roomId/dates", requireLogin, async (req, res) => {
         await connection.rollback().catch(() => {});
         console.error("날짜 저장 실패:", error.message);
         res.status(500).json({ message: "날짜를 저장하지 못했습니다." });
+    } finally {
+        connection.release();
+    }
+});
+
+// 방 나가기
+// - 방장이 나가면 다음 멤버에게 방장을 넘김
+// - 마지막 멤버가 나가면 방과 사진, 약속 기록까지 삭제
+router.post("/rooms/:roomId/leave", requireLogin, async (req, res) => {
+    const roomId = parseRoomId(req.params.roomId);
+
+    if (!roomId) {
+        return res.status(400).json({ message: "올바르지 않은 방 번호입니다." });
+    }
+
+    const userId = req.session.userId;
+    const connection = await pool.getConnection();
+    let filesToDelete = [];
+
+    try {
+        if (!(await isRoomMember(roomId, userId))) {
+            return res.status(404).json({ message: "참여 중인 방이 아닙니다." });
+        }
+
+        await connection.beginTransaction();
+
+        const [rooms] = await connection.query(
+            "SELECT owner_user_id FROM rooms WHERE room_id = ? FOR UPDATE",
+            [roomId]
+        );
+
+        await connection.query(
+            "DELETE FROM room_availabilities WHERE room_id = ? AND user_id = ?",
+            [roomId, userId]
+        );
+
+        await connection.query(
+            "DELETE FROM room_members WHERE room_id = ? AND user_id = ?",
+            [roomId, userId]
+        );
+
+        const [remaining] = await connection.query(
+            "SELECT user_id FROM room_members WHERE room_id = ? ORDER BY user_id ASC",
+            [roomId]
+        );
+
+        let roomDeleted = false;
+
+        if (remaining.length === 0) {
+            const [photos] = await connection.query(
+                "SELECT file_path FROM photos WHERE room_id = ?",
+                [roomId]
+            );
+            filesToDelete = photos.map((photo) => photo.file_path);
+
+            await connection.query(
+                "DELETE FROM photo_likes WHERE photo_id IN (SELECT photo_id FROM photos WHERE room_id = ?)",
+                [roomId]
+            );
+            await connection.query("DELETE FROM photos WHERE room_id = ?", [roomId]);
+            await connection.query("DELETE FROM photo_folders WHERE room_id = ?", [roomId]);
+            await connection.query("DELETE FROM appointments WHERE room_id = ?", [roomId]);
+            await connection.query("DELETE FROM room_availabilities WHERE room_id = ?", [roomId]);
+            await connection.query("DELETE FROM rooms WHERE room_id = ?", [roomId]);
+            roomDeleted = true;
+        } else if (rooms.length > 0 && rooms[0].owner_user_id === userId) {
+            const nextOwner = remaining[0].user_id;
+
+            await connection.query(
+                "UPDATE rooms SET owner_user_id = ? WHERE room_id = ?",
+                [nextOwner, roomId]
+            );
+            await connection.query(
+                "UPDATE room_members SET role = 'owner' WHERE room_id = ? AND user_id = ?",
+                [roomId, nextOwner]
+            );
+        }
+
+        await connection.commit();
+
+        // 삭제된 방의 사진 파일 정리 (실패해도 무시)
+        filesToDelete.forEach((filePath) => {
+            const target = path.join(uploadDir, path.basename(filePath));
+            fs.promises.unlink(target).catch(() => {});
+        });
+
+        res.json({
+            message: roomDeleted ? "방을 나갔고, 남은 멤버가 없어 방이 삭제되었습니다." : "방을 나갔습니다.",
+            room_deleted: roomDeleted
+        });
+    } catch (error) {
+        await connection.rollback().catch(() => {});
+        console.error("방 나가기 실패:", error.message);
+        res.status(500).json({ message: "방을 나가지 못했습니다." });
     } finally {
         connection.release();
     }
