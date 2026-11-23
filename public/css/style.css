@@ -40,10 +40,7 @@ body {
     padding: 20px;
     color: var(--ink);
     font-family: var(--font-body);
-    background:
-        radial-gradient(circle at 15% 20%, #ffffff 0 9%, transparent 9.3%),
-        radial-gradient(circle at 88% 82%, #ffffff 0 12%, transparent 12.3%),
-        linear-gradient(160deg, #c9e5ff 0%, #e6f3ff 60%, #f4faff 100%);
+    background: #cfe8ff;
     -webkit-tap-highlight-color: transparent;
 }
 
@@ -247,26 +244,51 @@ button:focus-visible, input:focus-visible {
 }
 
 .brand-title {
+    position: relative;
     margin: 0;
     display: flex;
     flex-direction: column;
     align-items: center;
     line-height: 1;
+    transform: rotate(-3deg);
 }
 .brand-save {
     font-family: var(--font-serif);
     font-style: italic;
     font-weight: 600;
-    font-size: clamp(66px, 18vw, 84px);
-    letter-spacing: .01em;
+    font-size: clamp(88px, 24vw, 112px);
+    line-height: .86;
+    letter-spacing: -.01em;
+    color: var(--ink);
+    text-shadow: 0 5px 0 rgba(255, 255, 255, .75), 0 14px 24px rgba(63, 120, 190, .22);
 }
 .brand-memories {
-    margin-top: 4px;
+    position: relative;
+    isolation: isolate;
+    margin-top: -2px;
+    padding: 0 10px;
+    font-family: "Dancing Script", "Brush Script MT", cursive;
     font-weight: 700;
-    font-size: clamp(40px, 11vw, 52px);
-    letter-spacing: -.02em;
-    transform: rotate(2deg);
+    font-size: clamp(56px, 15vw, 72px);
+    line-height: 1.12;
+    color: var(--ink);
 }
+.brand-memories::before {
+    content: "";
+    position: absolute;
+    z-index: -1;
+    left: 0;
+    right: 0;
+    bottom: 12%;
+    height: 38%;
+    border-radius: 999px;
+    background: linear-gradient(90deg, #fff6a0, var(--butter-deep));
+    transform: rotate(-1.5deg);
+}
+.brand-spark { position: absolute; color: #fff; filter: drop-shadow(0 3px 6px rgba(63, 120, 190, .3)); }
+.spark-a { width: 26px; height: 26px; top: -8px; right: -14px; color: var(--butter-deep); }
+.spark-b { width: 16px; height: 16px; top: 34px; right: -34px; }
+
 .intro-sub {
     margin: 18px 0 0;
     color: #4b6a8c;
@@ -1277,3 +1299,7 @@ button:focus-visible, input:focus-visible {
 @media (max-width: 380px) {
     .folder-grid { grid-template-columns: repeat(2, 1fr); }
 }
+
+
+.menu-since { margin: -8px 4px 12px; font-size: 12px; color: var(--muted); }
+.appt-sub.by { color: #9a8a3a; }

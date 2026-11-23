@@ -51,6 +51,28 @@ async function requireMember(req, res) {
     return roomId;
 }
 
+// 사진은 폴더에 속하고, 폴더가 방에 속한다. (photos 에는 room_id 를 따로 저장하지 않음)
+async function findPhotoInRoom(photoId, roomId) {
+    const [photos] = await pool.query(
+        `SELECT p.photo_id, p.file_path
+        FROM photos p
+        JOIN photo_folders f ON f.folder_id = p.folder_id
+        WHERE p.photo_id = ? AND f.room_id = ?`,
+        [photoId, roomId]
+    );
+
+    return photos[0] || null;
+}
+
+async function folderInRoom(folderId, roomId) {
+    const [folders] = await pool.query(
+        "SELECT folder_id FROM photo_folders WHERE folder_id = ? AND room_id = ?",
+        [folderId, roomId]
+    );
+
+    return folders.length > 0;
+}
+
 /* ---------------------------------------------------------------
    폴더
 --------------------------------------------------------------- */
@@ -73,7 +95,7 @@ function readFolder(body = {}) {
     return { values: { name, note, folderDate: rawDate || null } };
 }
 
-// 폴더 목록 (분류 없는 예전 사진은 '분류 없음' 폴더로 함께 보여 줌)
+// 폴더 목록 (최근 날짜 순)
 router.get("/rooms/:roomId/folders", requireLogin, async (req, res) => {
     try {
         const roomId = await requireMember(req, res);
@@ -86,37 +108,17 @@ router.get("/rooms/:roomId/folders", requireLogin, async (req, res) => {
                 DATE_FORMAT(f.folder_date, '%Y-%m-%d') AS folder_date,
                 f.note,
                 f.creator_user_id,
+                u.nickname AS creator_nickname,
                 (SELECT COUNT(*) FROM photos p WHERE p.folder_id = f.folder_id) AS photo_count,
                 (SELECT p.file_path FROM photos p
                     WHERE p.folder_id = f.folder_id
                     ORDER BY p.created_at DESC, p.photo_id DESC LIMIT 1) AS cover
             FROM photo_folders f
+            JOIN users u ON u.user_id = f.creator_user_id
             WHERE f.room_id = ?
-            ORDER BY (f.folder_date IS NULL) ASC, f.folder_date DESC, f.folder_id DESC`,
+            ORDER BY (f.folder_date IS NULL) ASC, f.folder_date DESC, f.created_at DESC, f.folder_id DESC`,
             [roomId]
         );
-
-        const [loose] = await pool.query(
-            `SELECT COUNT(*) AS photo_count,
-                (SELECT p.file_path FROM photos p
-                    WHERE p.room_id = ? AND p.folder_id IS NULL
-                    ORDER BY p.created_at DESC, p.photo_id DESC LIMIT 1) AS cover
-            FROM photos
-            WHERE room_id = ? AND folder_id IS NULL`,
-            [roomId, roomId]
-        );
-
-        if (loose[0].photo_count > 0) {
-            folders.push({
-                folder_id: 0,
-                name: "분류 없음",
-                folder_date: null,
-                note: "",
-                creator_user_id: null,
-                photo_count: loose[0].photo_count,
-                cover: loose[0].cover
-            });
-        }
 
         res.json(folders);
     } catch (error) {
@@ -186,7 +188,7 @@ router.put("/rooms/:roomId/folders/:folderId", requireLogin, async (req, res) =>
     }
 });
 
-// 폴더 삭제 (안의 사진도 함께 삭제)
+// 폴더 삭제 (안의 사진과 좋아요는 FK ON DELETE CASCADE 로 함께 삭제)
 router.delete("/rooms/:roomId/folders/:folderId", requireLogin, async (req, res) => {
     const folderId = parseId(req.params.folderId);
 
@@ -194,56 +196,30 @@ router.delete("/rooms/:roomId/folders/:folderId", requireLogin, async (req, res)
         return res.status(400).json({ message: "올바르지 않은 폴더 번호입니다." });
     }
 
-    const connection = await pool.getConnection();
-    let files = [];
-
     try {
         const roomId = await requireMember(req, res);
         if (!roomId) return;
 
-        const [folders] = await connection.query(
-            "SELECT folder_id FROM photo_folders WHERE folder_id = ? AND room_id = ?",
-            [folderId, roomId]
-        );
-
-        if (folders.length === 0) {
+        if (!(await folderInRoom(folderId, roomId))) {
             return res.status(404).json({ message: "폴더를 찾을 수 없습니다." });
         }
 
-        await connection.beginTransaction();
-
-        const [photos] = await connection.query(
-            "SELECT photo_id, file_path FROM photos WHERE folder_id = ? AND room_id = ?",
-            [folderId, roomId]
+        const [photos] = await pool.query(
+            "SELECT file_path FROM photos WHERE folder_id = ?",
+            [folderId]
         );
-        files = photos.map((photo) => photo.file_path);
 
-        if (photos.length > 0) {
-            await connection.query(
-                "DELETE FROM photo_likes WHERE photo_id IN (?)",
-                [photos.map((photo) => photo.photo_id)]
-            );
-            await connection.query(
-                "DELETE FROM photos WHERE folder_id = ? AND room_id = ?",
-                [folderId, roomId]
-            );
-        }
-
-        await connection.query(
+        await pool.query(
             "DELETE FROM photo_folders WHERE folder_id = ? AND room_id = ?",
             [folderId, roomId]
         );
 
-        await connection.commit();
-        files.forEach(removeFile);
+        photos.forEach((photo) => removeFile(photo.file_path));
 
         res.json({ message: "폴더를 삭제했습니다." });
     } catch (error) {
-        await connection.rollback().catch(() => {});
         console.error("폴더 삭제 실패:", error.message);
         res.status(500).json({ message: "폴더를 삭제하지 못했습니다." });
-    } finally {
-        connection.release();
     }
 });
 
@@ -251,27 +227,20 @@ router.delete("/rooms/:roomId/folders/:folderId", requireLogin, async (req, res)
    사진
 --------------------------------------------------------------- */
 
-// 사진 목록 (?folder_id=번호, 분류 없음은 folder_id=none, 생략하면 전체)
+// 폴더 안 사진 목록 (?folder_id=번호)
 router.get("/rooms/:roomId/photos", requireLogin, async (req, res) => {
     try {
         const roomId = await requireMember(req, res);
         if (!roomId) return;
 
-        const params = [req.session.userId, roomId];
-        let folderFilter = "";
+        const folderId = parseId(req.query.folder_id);
 
-        const rawFolder = req.query.folder_id;
-        if (rawFolder === "none" || rawFolder === "0") {
-            folderFilter = "AND p.folder_id IS NULL";
-        } else if (rawFolder !== undefined) {
-            const folderId = parseId(rawFolder);
+        if (!folderId) {
+            return res.status(400).json({ message: "folder_id 가 필요합니다." });
+        }
 
-            if (!folderId) {
-                return res.status(400).json({ message: "올바르지 않은 폴더 번호입니다." });
-            }
-
-            folderFilter = "AND p.folder_id = ?";
-            params.push(folderId);
+        if (!(await folderInRoom(folderId, roomId))) {
+            return res.status(404).json({ message: "폴더를 찾을 수 없습니다." });
         }
 
         const [photos] = await pool.query(
@@ -279,6 +248,7 @@ router.get("/rooms/:roomId/photos", requireLogin, async (req, res) => {
                 p.photo_id,
                 p.folder_id,
                 p.uploader_user_id,
+                u.nickname AS uploader_nickname,
                 p.file_path,
                 p.caption,
                 p.created_at,
@@ -286,9 +256,10 @@ router.get("/rooms/:roomId/photos", requireLogin, async (req, res) => {
                 EXISTS(SELECT 1 FROM photo_likes l
                     WHERE l.photo_id = p.photo_id AND l.user_id = ?) AS liked
             FROM photos p
-            WHERE p.room_id = ? ${folderFilter}
+            JOIN users u ON u.user_id = p.uploader_user_id
+            WHERE p.folder_id = ?
             ORDER BY p.created_at DESC, p.photo_id DESC`,
-            params
+            [req.session.userId, folderId]
         );
 
         res.json(photos.map((photo) => ({ ...photo, liked: Boolean(photo.liked) })));
@@ -298,7 +269,7 @@ router.get("/rooms/:roomId/photos", requireLogin, async (req, res) => {
     }
 });
 
-// 사진 업로드 (folder_id 를 함께 보내면 그 폴더에 저장)
+// 사진 업로드 (folder_id 필수)
 router.post("/rooms/:roomId/photos", requireLogin, (req, res) => {
     upload.single("photo")(req, res, async (uploadError) => {
         if (uploadError) {
@@ -335,31 +306,19 @@ router.post("/rooms/:roomId/photos", requireLogin, (req, res) => {
                 return res.status(400).json({ message: "사진 설명은 500자 이하로 작성해 주세요." });
             }
 
-            let folderId = null;
-            const rawFolder = req.body.folder_id;
+            const folderId = parseId(req.body.folder_id);
 
-            if (rawFolder !== undefined && rawFolder !== "" && rawFolder !== "0" && rawFolder !== "none") {
-                folderId = parseId(rawFolder);
-
-                const [folders] = folderId
-                    ? await pool.query(
-                        "SELECT folder_id FROM photo_folders WHERE folder_id = ? AND room_id = ?",
-                        [folderId, roomId]
-                    )
-                    : [[]];
-
-                if (folders.length === 0) {
-                    discard();
-                    return res.status(404).json({ message: "폴더를 찾을 수 없습니다." });
-                }
+            if (!folderId || !(await folderInRoom(folderId, roomId))) {
+                discard();
+                return res.status(404).json({ message: "사진을 넣을 폴더를 찾을 수 없습니다." });
             }
 
             const filePath = `/uploads/${req.file.filename}`;
 
             const [result] = await pool.query(
-                `INSERT INTO photos (room_id, uploader_user_id, folder_id, file_path, caption)
-                VALUES (?, ?, ?, ?, ?)`,
-                [roomId, userId, folderId, filePath, caption]
+                `INSERT INTO photos (folder_id, uploader_user_id, file_path, caption)
+                VALUES (?, ?, ?, ?)`,
+                [folderId, userId, filePath, caption]
             );
 
             res.status(201).json({
@@ -391,14 +350,11 @@ router.put("/rooms/:roomId/photos/:photoId", requireLogin, async (req, res) => {
         const roomId = await requireMember(req, res);
         if (!roomId) return;
 
-        const [result] = await pool.query(
-            "UPDATE photos SET caption = ? WHERE photo_id = ? AND room_id = ?",
-            [caption, photoId, roomId]
-        );
-
-        if (result.affectedRows === 0) {
+        if (!(await findPhotoInRoom(photoId, roomId))) {
             return res.status(404).json({ message: "사진을 찾을 수 없습니다." });
         }
+
+        await pool.query("UPDATE photos SET caption = ? WHERE photo_id = ?", [caption, photoId]);
 
         res.json({ message: "사진 설명이 수정되었습니다.", caption });
     } catch (error) {
@@ -407,7 +363,7 @@ router.put("/rooms/:roomId/photos/:photoId", requireLogin, async (req, res) => {
     }
 });
 
-// 사진 삭제
+// 사진 삭제 (좋아요는 FK ON DELETE CASCADE 로 함께 삭제)
 router.delete("/rooms/:roomId/photos/:photoId", requireLogin, async (req, res) => {
     const photoId = parseId(req.params.photoId);
 
@@ -419,18 +375,14 @@ router.delete("/rooms/:roomId/photos/:photoId", requireLogin, async (req, res) =
         const roomId = await requireMember(req, res);
         if (!roomId) return;
 
-        const [photos] = await pool.query(
-            "SELECT file_path FROM photos WHERE photo_id = ? AND room_id = ?",
-            [photoId, roomId]
-        );
+        const photo = await findPhotoInRoom(photoId, roomId);
 
-        if (photos.length === 0) {
+        if (!photo) {
             return res.status(404).json({ message: "사진을 찾을 수 없습니다." });
         }
 
-        await pool.query("DELETE FROM photo_likes WHERE photo_id = ?", [photoId]);
-        await pool.query("DELETE FROM photos WHERE photo_id = ? AND room_id = ?", [photoId, roomId]);
-        removeFile(photos[0].file_path);
+        await pool.query("DELETE FROM photos WHERE photo_id = ?", [photoId]);
+        removeFile(photo.file_path);
 
         res.json({ message: "사진을 삭제했습니다." });
     } catch (error) {
@@ -453,12 +405,7 @@ router.post("/rooms/:roomId/photos/:photoId/like", requireLogin, async (req, res
 
         const userId = req.session.userId;
 
-        const [photos] = await pool.query(
-            "SELECT photo_id FROM photos WHERE photo_id = ? AND room_id = ?",
-            [photoId, roomId]
-        );
-
-        if (photos.length === 0) {
+        if (!(await findPhotoInRoom(photoId, roomId))) {
             return res.status(404).json({ message: "사진을 찾을 수 없습니다." });
         }
 
@@ -476,7 +423,7 @@ router.post("/rooms/:roomId/photos/:photoId/like", requireLogin, async (req, res
             liked = false;
         } else {
             await pool.query(
-                "INSERT IGNORE INTO photo_likes (photo_id, user_id) VALUES (?, ?)",
+                "INSERT INTO photo_likes (photo_id, user_id) VALUES (?, ?)",
                 [photoId, userId]
             );
             liked = true;

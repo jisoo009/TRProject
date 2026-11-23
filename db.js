@@ -13,175 +13,66 @@ const pool = mysql.createPool({
     charset: "utf8mb4"
 });
 
-// 서버 시작 시 필요한 테이블이 없으면 만들어 줍니다.
-// (이미 있는 테이블은 건드리지 않습니다.)
-async function createTables() {
-    await pool.query(`
-        CREATE TABLE IF NOT EXISTS users (
-            user_id INT AUTO_INCREMENT PRIMARY KEY,
-            email VARCHAR(255) NOT NULL UNIQUE,
-            password_hash VARCHAR(255) NOT NULL,
-            nickname VARCHAR(50) NOT NULL,
-            created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
-        ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4
-    `);
+// database/save_memories.sql 에서 설계한 테이블과 칼럼 목록
+// 코드가 이 구조와 정확히 같은 DB 위에서만 동작하도록 서버 시작 때 확인한다.
+const DESIGNED_SCHEMA = {
+    users: ["user_id", "email", "password_hash", "nickname", "created_at"],
+    rooms: ["room_id", "owner_user_id", "room_name", "invite_code", "created_at"],
+    room_members: ["room_id", "user_id", "joined_at"],
+    room_availabilities: ["room_id", "user_id", "available_date"],
+    appointments: [
+        "appointment_id", "room_id", "creator_user_id", "title",
+        "start_at", "place", "description", "created_at"
+    ],
+    photo_folders: [
+        "folder_id", "room_id", "creator_user_id", "name",
+        "folder_date", "note", "created_at"
+    ],
+    photos: ["photo_id", "folder_id", "uploader_user_id", "file_path", "caption", "created_at"],
+    photo_likes: ["photo_id", "user_id"]
+};
 
-    await pool.query(`
-        CREATE TABLE IF NOT EXISTS rooms (
-            room_id INT AUTO_INCREMENT PRIMARY KEY,
-            owner_user_id INT NOT NULL,
-            room_name VARCHAR(100) NOT NULL,
-            description VARCHAR(500) NOT NULL DEFAULT '',
-            invite_code VARCHAR(20) NOT NULL UNIQUE,
-            created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
-        ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4
-    `);
-
-    await pool.query(`
-        CREATE TABLE IF NOT EXISTS room_members (
-            room_id INT NOT NULL,
-            user_id INT NOT NULL,
-            role VARCHAR(20) NOT NULL DEFAULT 'member',
-            joined_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-            PRIMARY KEY (room_id, user_id)
-        ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4
-    `);
-
-    // 멤버별로 "되는 날짜"를 저장하는 테이블
-    await pool.query(`
-        CREATE TABLE IF NOT EXISTS room_availabilities (
-            id INT AUTO_INCREMENT PRIMARY KEY,
-            room_id INT NOT NULL,
-            user_id INT NOT NULL,
-            available_date DATE NOT NULL,
-            UNIQUE KEY unique_member_date (room_id, user_id, available_date)
-        ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4
-    `);
-
-    await pool.query(`
-        CREATE TABLE IF NOT EXISTS appointments (
-            appointment_id INT AUTO_INCREMENT PRIMARY KEY,
-            room_id INT NOT NULL,
-            creator_user_id INT NOT NULL,
-            title VARCHAR(200) NOT NULL,
-            start_at DATETIME NOT NULL,
-            place VARCHAR(255) NOT NULL DEFAULT '',
-            description TEXT,
-            status VARCHAR(20) NOT NULL DEFAULT 'planned',
-            created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
-        ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4
-    `);
-
-    // 날짜별 사진 폴더
-    await pool.query(`
-        CREATE TABLE IF NOT EXISTS photo_folders (
-            folder_id INT AUTO_INCREMENT PRIMARY KEY,
-            room_id INT NOT NULL,
-            creator_user_id INT NOT NULL,
-            name VARCHAR(100) NOT NULL,
-            folder_date DATE NULL,
-            note VARCHAR(500) NOT NULL DEFAULT '',
-            created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-            KEY idx_folder_room (room_id)
-        ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4
-    `);
-
-    await pool.query(`
-        CREATE TABLE IF NOT EXISTS photo_likes (
-            photo_id INT NOT NULL,
-            user_id INT NOT NULL,
-            PRIMARY KEY (photo_id, user_id)
-        ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4
-    `);
-
-    await pool.query(`
-        CREATE TABLE IF NOT EXISTS photos (
-            photo_id INT AUTO_INCREMENT PRIMARY KEY,
-            room_id INT NOT NULL,
-            uploader_user_id INT NOT NULL,
-            file_path VARCHAR(255) NOT NULL,
-            caption VARCHAR(500) NOT NULL DEFAULT '',
-            created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
-        ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4
-    `);
-}
-
-// 예전 버전으로 이미 만들어진 테이블(room_code / host_id 등)을 지금 구조에 맞게 고칩니다.
-async function columnsOf(table) {
+async function checkSchema() {
     const [rows] = await pool.query(
-        `SELECT COLUMN_NAME AS name FROM information_schema.COLUMNS
-        WHERE TABLE_SCHEMA = DATABASE() AND TABLE_NAME = ?`,
-        [table]
+        `SELECT TABLE_NAME AS table_name, COLUMN_NAME AS column_name
+        FROM information_schema.COLUMNS
+        WHERE TABLE_SCHEMA = DATABASE()`
     );
-    return new Set(rows.map((row) => row.name));
-}
 
-async function runMigration(label, sql) {
-    try {
-        await pool.query(sql);
-        console.log(`DB 구조 수정: ${label}`);
-    } catch (error) {
-        console.error(`DB 구조 수정 실패 (${label}):`, error.message);
-    }
-}
+    const actual = new Map();
+    rows.forEach((row) => {
+        if (!actual.has(row.table_name)) actual.set(row.table_name, new Set());
+        actual.get(row.table_name).add(row.column_name);
+    });
 
-async function migrateLegacySchema() {
-    const rooms = await columnsOf("rooms");
+    const problems = [];
 
-    if (rooms.has("id") && !rooms.has("room_id")) {
-        await runMigration("rooms.id -> room_id", "ALTER TABLE rooms CHANGE id room_id INT NOT NULL AUTO_INCREMENT");
-    }
-    if (rooms.has("room_code") && !rooms.has("invite_code")) {
-        await runMigration("rooms.room_code -> invite_code", "ALTER TABLE rooms CHANGE room_code invite_code VARCHAR(20) NOT NULL");
-    }
-    if (rooms.has("host_id") && !rooms.has("owner_user_id")) {
-        await runMigration("rooms.host_id -> owner_user_id", "ALTER TABLE rooms CHANGE host_id owner_user_id INT NOT NULL");
-    }
-    if (!rooms.has("room_name")) {
-        await runMigration("rooms.room_name 추가", "ALTER TABLE rooms ADD COLUMN room_name VARCHAR(100) NOT NULL DEFAULT ''");
-    }
-    if (!rooms.has("description")) {
-        await runMigration("rooms.description 추가", "ALTER TABLE rooms ADD COLUMN description VARCHAR(500) NOT NULL DEFAULT ''");
-    }
-    if (!rooms.has("created_at")) {
-        await runMigration("rooms.created_at 추가", "ALTER TABLE rooms ADD COLUMN created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP");
-    }
-    // 코드 칸이 너무 짧으면 넓혀 줌
-    await pool.query("ALTER TABLE rooms MODIFY invite_code VARCHAR(20) NOT NULL").catch(() => {});
+    Object.entries(DESIGNED_SCHEMA).forEach(([table, columns]) => {
+        const found = actual.get(table);
 
-    const members = await columnsOf("room_members");
+        if (!found) {
+            problems.push(`테이블 없음: ${table}`);
+            return;
+        }
 
-    if (!members.has("role")) {
-        await runMigration("room_members.role 추가", "ALTER TABLE room_members ADD COLUMN role VARCHAR(20) NOT NULL DEFAULT 'member'");
-        await pool.query(
-            `UPDATE room_members rm JOIN rooms r ON r.room_id = rm.room_id
-            SET rm.role = 'owner' WHERE rm.user_id = r.owner_user_id`
-        ).catch(() => {});
-    }
-    // 예전 구조의 nickname / color_hex는 값 없이 넣어도 되도록 기본값 지정
-    if (members.has("nickname")) {
-        await pool.query("ALTER TABLE room_members MODIFY nickname VARCHAR(50) NOT NULL DEFAULT ''").catch(() => {});
-    }
-    if (members.has("color_hex")) {
-        await pool.query("ALTER TABLE room_members MODIFY color_hex VARCHAR(20) NOT NULL DEFAULT ''").catch(() => {});
+        columns.filter((column) => !found.has(column))
+            .forEach((column) => problems.push(`칼럼 없음: ${table}.${column}`));
+
+        [...found].filter((column) => !columns.includes(column))
+            .forEach((column) => problems.push(`설계에 없는 칼럼: ${table}.${column}`));
+    });
+
+    if (problems.length > 0) {
+        const error = new Error(
+            "DB 구조가 설계(database/save_memories.sql)와 다릅니다.\n  - " +
+            problems.join("\n  - ")
+        );
+        error.code = "SCHEMA_MISMATCH";
+        throw error;
     }
 }
 
-async function migratePhotos() {
-    const photos = await columnsOf("photos");
-
-    if (!photos.has("folder_id")) {
-        await runMigration("photos.folder_id 추가", "ALTER TABLE photos ADD COLUMN folder_id INT NULL");
-    }
-}
-
-async function initTables() {
-    await createTables();
-    await migratePhotos();
-    await migrateLegacySchema();
-}
-
-pool.initTables = initTables;
+pool.checkSchema = checkSchema;
 
 // 다른 파일에서도 데이터베이스를 사용할 수 있도록 내보내기
 module.exports = pool;

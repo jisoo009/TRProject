@@ -5,6 +5,13 @@ const crypto = require("crypto");
 
 const uploadDir = path.join(__dirname, "uploads");
 
+// 저장 확장자는 검사한 MIME 타입으로 정한다 (파일 이름을 그대로 믿지 않음)
+const EXTENSIONS = {
+    "image/jpeg": ".jpg",
+    "image/png": ".png",
+    "image/webp": ".webp"
+};
+
 if (!fs.existsSync(uploadDir)) {
     fs.mkdirSync(uploadDir, { recursive: true });
 }
@@ -15,7 +22,7 @@ const storage = multer.diskStorage({
     },
 
 filename: (req, file, cb) => {
-    const extension = path.extname(file.originalname).toLowerCase();
+    const extension = EXTENSIONS[file.mimetype] || ".jpg";
 
     const filename =
         `${Date.now()}-${crypto.randomUUID()}${extension}`;

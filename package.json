@@ -1,8 +1,8 @@
 {
-  "name": "tr",
+  "name": "save-memories",
   "version": "1.0.0",
-  "description": "",
-  "main": "index.js",
+  "description": "친구들과 방을 만들어 약속 날짜를 맞추고, 날짜별 사진 폴더로 추억을 저장하는 웹 서비스",
+  "main": "server.js",
   "scripts": {
     "start": "node server.js",
     "test": "echo \"Error: no test specified\" && exit 1"
@@ -18,5 +18,8 @@
     "express-session": "^1.19.0",
     "multer": "^2.5.0",
     "mysql2": "^3.24.6"
+  },
+  "engines": {
+    "node": ">=18"
   }
 }

@@ -306,8 +306,18 @@
        로그인 이후 진입
     ------------------------------------------------------------------ */
     async function enterApp(user) {
+        // 로그인 응답에는 가입일이 없으므로 /api/me 로 전체 회원 정보를 가져온다
+        if (!user.created_at) {
+            try {
+                user = (await api("/api/me")).user;
+            } catch (error) {
+                // 가져오지 못해도 로그인은 계속 진행
+            }
+        }
+
         state.user = user;
         $("#menu-user").textContent = `${user.nickname}님`;
+        $("#menu-since").textContent = user.created_at ? `가입일 ${formatDotDate(user.created_at)}` : "";
         $("#avatar-initial").textContent = firstLetter(user.nickname);
         $("#hello-title").textContent = `안녕, ${user.nickname}!`;
         showScreen("main");
@@ -777,7 +787,8 @@
             const days = document.createElement("span");
             days.className = "member-days";
             const count = member.is_me ? state.mine.size : member.dateSet.size;
-            days.textContent = count > 0 ? `${count}일 선택` : "아직 선택 안 함";
+            const picked = count > 0 ? `${count}일 선택` : "아직 선택 안 함";
+            days.textContent = member.joined_at ? `${picked} · ${formatDotDate(member.joined_at)} 참여` : picked;
 
             info.append(name, days);
             item.append(makeAvatar(member), info);
@@ -1189,6 +1200,13 @@
             title.textContent = `${formatDotDate(appt.date)}${timeText} - ${appt.title}`;
             main.appendChild(title);
 
+            if (appt.creator_nickname) {
+                const by = document.createElement("span");
+                by.className = "appt-sub by";
+                by.append(icon("user"), document.createTextNode(`${appt.creator_nickname}님이 만들었어요`));
+                main.appendChild(by);
+            }
+
             if (appt.place) {
                 const place = document.createElement("span");
                 place.className = "appt-sub";
@@ -1449,11 +1467,6 @@
         note.textContent = folder.note || "";
         note.hidden = !folder.note;
 
-        // '분류 없음'(예전 사진)은 수정/삭제 불가
-        const virtual = folder.folder_id === 0;
-        $("#album-edit").hidden = virtual;
-        $("#album-delete").hidden = virtual;
-
         renderPhotos();
     }
 
@@ -1514,11 +1527,6 @@
         }
     });
 
-    function uploaderName(userId) {
-        const member = state.members.find((item) => item.user_id === userId);
-        return member ? member.nickname : "";
-    }
-
     async function loadPhotos() {
         if (!state.room || !state.folder) return;
 
@@ -1526,7 +1534,7 @@
         const folderId = state.folder.folder_id;
 
         try {
-            const photos = await api(`/api/rooms/${roomId}/photos?folder_id=${folderId || "none"}`);
+            const photos = await api(`/api/rooms/${roomId}/photos?folder_id=${folderId}`);
             if (!state.room || state.room.room_id !== roomId || !state.folder || state.folder.folder_id !== folderId) return;
 
             state.photos = photos;
@@ -1586,7 +1594,7 @@
             }
 
             const formData = new FormData();
-            formData.append("folder_id", String(folderId || ""));
+            formData.append("folder_id", String(folderId));
             formData.append("photo", file);
 
             try {
@@ -1627,7 +1635,7 @@
         $("#lightbox-img").alt = photo.caption || "방 사진";
         $("#lightbox-caption").textContent = photo.caption || "";
 
-        const who = uploaderName(photo.uploader_user_id);
+        const who = photo.uploader_nickname || "";
         const when = photo.created_at ? formatDotDate(String(photo.created_at).slice(0, 10)) : "";
         $("#lightbox-meta").textContent = [who, when].filter(Boolean).join(" · ");
 

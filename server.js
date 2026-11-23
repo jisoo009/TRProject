@@ -8,8 +8,13 @@ const path = require("path");
 const { uploadDir } = require("./config/upload");
 const pool = require("./db");
 
+if (!process.env.SESSION_SECRET) {
+    console.error("SESSION_SECRET 이 .env 에 없습니다. .env.example 을 참고해 주세요.");
+    process.exit(1);
+}
+
 const app = express();
-const PORT = 3000;
+const PORT = Number(process.env.PORT) || 3000;
 
 // 기본 미들웨어
 app.use(express.json());
@@ -38,7 +43,7 @@ app.use("/uploads", express.static(uploadDir));
 // 서버 테스트
 app.get("/api/test", (req, res) => {
     res.json({
-        message: "Time Remember 서버가 정상적으로 작동합니다!"
+        message: "Save Memories 서버가 정상적으로 작동합니다!"
     });
 });
 
@@ -79,14 +84,19 @@ app.use((error, req, res, next) => {
     });
 });
 
-// 서버 실행 (테이블 준비가 끝난 뒤에 시작)
-pool.initTables()
+// 서버 실행 (DB 구조가 설계와 같은지 확인한 뒤에 시작)
+pool.checkSchema()
     .then(() => {
         app.listen(PORT, () => {
             console.log(`서버 실행 주소: http://localhost:${PORT}`);
         });
     })
     .catch((error) => {
-        console.error("DB 초기화 실패 (.env의 DB 설정을 확인해 주세요):", error.message);
+        if (error.code === "SCHEMA_MISMATCH") {
+            console.error(error.message);
+            console.error("\n→ database/save_memories.sql 을 import 해서 DB를 다시 만들어 주세요.");
+        } else {
+            console.error("DB 연결 실패 (.env 의 DB 설정을 확인해 주세요):", error.message);
+        }
         process.exit(1);
     });

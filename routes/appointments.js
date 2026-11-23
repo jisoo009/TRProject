@@ -97,17 +97,18 @@ router.get("/rooms/:roomId/appointments", requireLogin, async (req, res) => {
 
         const [appointments] = await pool.query(
             `SELECT
-                appointment_id,
-                title,
-                DATE_FORMAT(start_at, '%Y-%m-%d') AS date,
-                DATE_FORMAT(start_at, '%H:%i') AS time,
-                place,
-                description,
-                status,
-                creator_user_id
-            FROM appointments
-            WHERE room_id = ?
-            ORDER BY start_at ASC, appointment_id ASC`,
+                a.appointment_id,
+                a.title,
+                DATE_FORMAT(a.start_at, '%Y-%m-%d') AS date,
+                DATE_FORMAT(a.start_at, '%H:%i') AS time,
+                a.place,
+                a.description,
+                a.creator_user_id,
+                u.nickname AS creator_nickname
+            FROM appointments a
+            JOIN users u ON u.user_id = a.creator_user_id
+            WHERE a.room_id = ?
+            ORDER BY a.start_at ASC, a.created_at ASC, a.appointment_id ASC`,
             [roomId]
         );
 
@@ -134,8 +135,8 @@ router.post("/rooms/:roomId/appointments", requireLogin, async (req, res) => {
 
         const [result] = await pool.query(
             `INSERT INTO appointments
-            (room_id, creator_user_id, title, start_at, place, description, status)
-            VALUES (?, ?, ?, ?, ?, ?, 'planned')`,
+            (room_id, creator_user_id, title, start_at, place, description)
+            VALUES (?, ?, ?, ?, ?, ?)`,
             [roomId, req.session.userId, title, startAt, place, description]
         );
 

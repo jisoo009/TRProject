@@ -1,3 +1,22 @@
+# 의존성
 node_modules/
+
+# 개인 설정/비밀번호 (절대 올리지 않기)
 .env
-uploads/s
+
+# 사용자가 올린 사진 (폴더만 유지)
+config/uploads/*
+!config/uploads/.gitkeep
+
+# 기타
+.DS_Store
+*.log
+
+# Local database backups
+backup_*.sql
+
+# Environment secrets
+.env
+
+# Uploaded user files
+config/uploads/

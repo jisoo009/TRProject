@@ -7,7 +7,7 @@
     <title>Save Memories</title>
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,500;0,600;1,500;1,600&family=Jua&family=Noto+Sans+KR:wght@400;500;700&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,500;0,600;1,500;1,600&family=Dancing+Script:wght@600;700&family=Jua&family=Noto+Sans+KR:wght@400;500;700&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="css/style.css">
     <script src="js/script.js" defer></script>
 </head>
@@ -68,7 +68,9 @@
         </div>
 
         <div class="intro-text">
-            <h1 class="brand-title">
+            <h1 class="brand-title" aria-label="Save Memories">
+                <svg class="i fill brand-spark spark-a" aria-hidden="true"><use href="#i-star"/></svg>
+                <svg class="i fill brand-spark spark-b" aria-hidden="true"><use href="#i-star"/></svg>
                 <span class="brand-save">Save</span>
                 <span class="brand-memories">Memories</span>
             </h1>
@@ -152,6 +154,7 @@
 
         <div id="menu-panel" class="menu-panel" hidden>
             <p id="menu-user" class="menu-user"></p>
+            <p id="menu-since" class="menu-since"></p>
             <button type="button" id="menu-logout" class="btn btn-soft btn-block">
                 <svg class="i"><use href="#i-logout"/></svg> 로그아웃
             </button>

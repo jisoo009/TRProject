@@ -8,7 +8,7 @@ const { uploadDir } = require("../config/upload");
 
 const router = express.Router();
 
-// 멤버별 구분 색상 (방장이 첫 번째, 이후 참여 순서대로)
+// 멤버별 구분 색상 (방장이 첫 번째, 이후 참여 순서대로) - DB에 저장하지 않고 계산한다.
 const MEMBER_COLORS = [
     "#f5e960", // 노랑
     "#8ccbff", // 하늘
@@ -64,13 +64,12 @@ async function isRoomMember(roomId, userId) {
     return rows.length > 0;
 }
 
-// 내가 참여한 방 목록
+// 내가 참여한 방 목록 (방장 여부는 rooms.owner_user_id 로 계산)
 router.get("/rooms", requireLogin, async (req, res) => {
     try {
         const [rooms] = await pool.query(
-            `SELECT r.room_id,
-                    IF(r.room_name = '', CONCAT('방 ', r.invite_code), r.room_name) AS room_name,
-                    r.invite_code, rm.role, r.created_at,
+            `SELECT r.room_id, r.room_name, r.invite_code, r.created_at,
+                    IF(r.owner_user_id = rm.user_id, 'owner', 'member') AS role,
                     (SELECT COUNT(*) FROM room_members c WHERE c.room_id = r.room_id) AS member_count
             FROM rooms r
             JOIN room_members rm ON r.room_id = rm.room_id
@@ -129,14 +128,13 @@ router.post("/rooms", requireLogin, async (req, res) => {
         await connection.beginTransaction();
 
         const [result] = await connection.query(
-            `INSERT INTO rooms (owner_user_id, room_name, description, invite_code)
-            VALUES (?, ?, '', ?)`,
+            `INSERT INTO rooms (owner_user_id, room_name, invite_code)
+            VALUES (?, ?, ?)`,
             [req.session.userId, roomName, inviteCode]
         );
 
         await connection.query(
-            `INSERT INTO room_members (room_id, user_id, role)
-            VALUES (?, ?, 'owner')`,
+            "INSERT INTO room_members (room_id, user_id) VALUES (?, ?)",
             [result.insertId, req.session.userId]
         );
 
@@ -184,8 +182,7 @@ router.post("/rooms/join", requireLogin, async (req, res) => {
 
         if (!(await isRoomMember(room.room_id, req.session.userId))) {
             await pool.query(
-                `INSERT INTO room_members (room_id, user_id, role)
-                VALUES (?, ?, 'member')`,
+                "INSERT INTO room_members (room_id, user_id) VALUES (?, ?)",
                 [room.room_id, req.session.userId]
             );
         }
@@ -222,11 +219,14 @@ router.get("/rooms/:roomId", requireLogin, async (req, res) => {
         }
 
         const [members] = await pool.query(
-            `SELECT rm.user_id, rm.role, u.nickname
+            `SELECT rm.user_id, u.nickname,
+                    DATE_FORMAT(rm.joined_at, '%Y-%m-%d') AS joined_at,
+                    (rm.user_id = r.owner_user_id) AS is_owner
             FROM room_members rm
             JOIN users u ON u.user_id = rm.user_id
+            JOIN rooms r ON r.room_id = rm.room_id
             WHERE rm.room_id = ?
-            ORDER BY (rm.role = 'owner') DESC, rm.user_id ASC`,
+            ORDER BY is_owner DESC, rm.joined_at ASC, rm.user_id ASC`,
             [roomId]
         );
 
@@ -247,14 +247,12 @@ router.get("/rooms/:roomId", requireLogin, async (req, res) => {
         });
 
         res.json({
-            room: {
-                ...rooms[0],
-                room_name: rooms[0].room_name || `방 ${rooms[0].invite_code}`
-            },
+            room: rooms[0],
             members: members.map((member, index) => ({
                 user_id: member.user_id,
                 nickname: member.nickname,
-                role: member.role,
+                role: member.is_owner ? "owner" : "member",
+                joined_at: member.joined_at,
                 color: MEMBER_COLORS[index % MEMBER_COLORS.length],
                 is_me: member.user_id === userId,
                 dates: datesByUser.get(member.user_id) || []
@@ -320,8 +318,9 @@ router.put("/rooms/:roomId/dates", requireLogin, async (req, res) => {
 });
 
 // 방 나가기
-// - 방장이 나가면 다음 멤버에게 방장을 넘김
-// - 마지막 멤버가 나가면 방과 사진, 약속 기록까지 삭제
+// - 멤버 삭제 시 그 사람의 되는 날짜는 FK(ON DELETE CASCADE)로 함께 삭제된다.
+// - 방장이 나가면 가장 먼저 참여한 멤버에게 방장(rooms.owner_user_id)을 넘긴다.
+// - 마지막 멤버가 나가면 방을 삭제하고, 약속/폴더/사진/좋아요는 FK 로 함께 삭제된다.
 router.post("/rooms/:roomId/leave", requireLogin, async (req, res) => {
     const roomId = parseRoomId(req.params.roomId);
 
@@ -346,17 +345,14 @@ router.post("/rooms/:roomId/leave", requireLogin, async (req, res) => {
         );
 
         await connection.query(
-            "DELETE FROM room_availabilities WHERE room_id = ? AND user_id = ?",
-            [roomId, userId]
-        );
-
-        await connection.query(
             "DELETE FROM room_members WHERE room_id = ? AND user_id = ?",
             [roomId, userId]
         );
 
         const [remaining] = await connection.query(
-            "SELECT user_id FROM room_members WHERE room_id = ? ORDER BY user_id ASC",
+            `SELECT user_id FROM room_members
+            WHERE room_id = ?
+            ORDER BY joined_at ASC, user_id ASC`,
             [roomId]
         );
 
@@ -364,31 +360,20 @@ router.post("/rooms/:roomId/leave", requireLogin, async (req, res) => {
 
         if (remaining.length === 0) {
             const [photos] = await connection.query(
-                "SELECT file_path FROM photos WHERE room_id = ?",
+                `SELECT p.file_path
+                FROM photos p
+                JOIN photo_folders f ON f.folder_id = p.folder_id
+                WHERE f.room_id = ?`,
                 [roomId]
             );
             filesToDelete = photos.map((photo) => photo.file_path);
 
-            await connection.query(
-                "DELETE FROM photo_likes WHERE photo_id IN (SELECT photo_id FROM photos WHERE room_id = ?)",
-                [roomId]
-            );
-            await connection.query("DELETE FROM photos WHERE room_id = ?", [roomId]);
-            await connection.query("DELETE FROM photo_folders WHERE room_id = ?", [roomId]);
-            await connection.query("DELETE FROM appointments WHERE room_id = ?", [roomId]);
-            await connection.query("DELETE FROM room_availabilities WHERE room_id = ?", [roomId]);
             await connection.query("DELETE FROM rooms WHERE room_id = ?", [roomId]);
             roomDeleted = true;
         } else if (rooms.length > 0 && rooms[0].owner_user_id === userId) {
-            const nextOwner = remaining[0].user_id;
-
             await connection.query(
                 "UPDATE rooms SET owner_user_id = ? WHERE room_id = ?",
-                [nextOwner, roomId]
-            );
-            await connection.query(
-                "UPDATE room_members SET role = 'owner' WHERE room_id = ? AND user_id = ?",
-                [roomId, nextOwner]
+                [remaining[0].user_id, roomId]
             );
         }
 
