@@ -10,7 +10,7 @@ const router = express.Router();
 router.post("/signup", async (req, res) => {
     try {
         const nickname = typeof req.body.nickname === "string" ? req.body.nickname.trim() : "";
-        const email = typeof req.body.email === "string" ? req.body.email.trim() : "";
+        const email = typeof req.body.email === "string" ? req.body.email.trim().toLowerCase() : "";
         const password = typeof req.body.password === "string" ? req.body.password : "";
         if (!nickname || !email || !password) {
         return res.status(400).json({

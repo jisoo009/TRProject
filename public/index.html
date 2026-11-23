@@ -1,263 +1,418 @@
-
-    <!DOCTYPE html>
-    <html lang="ko">
-    <head>
+<!DOCTYPE html>
+<html lang="ko">
+<head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Time Remember</title>
-    <link rel="stylesheet" href="/css/style.css">
-    <script src="/js/script.js" defer></script>    
-    </head>
-    <body>
-    <main class="app">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+    <meta name="theme-color" content="#8ccbff">
+    <title>Save Memories</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,500;0,600;1,500;1,600&family=Dancing+Script:wght@600;700&family=Jua&family=Noto+Sans+KR:wght@400;500;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="css/style.css">
+    <script src="js/script.js" defer></script>
+</head>
+<body>
 
-        <!-- 첫 화면 -->
-        <section id="home-screen" class="screen home-screen">
-        <div class="home-content">
-            <p class="eyebrow">OUR LITTLE MOMENTS</p>
-            <h1>Time Remember</h1>
-            <p class="description">
-            친구들과 함께한 순간을 기록해 보세요.
-            </p>
+<!-- 아이콘 모음 -->
+<svg width="0" height="0" style="position:absolute" aria-hidden="true">
+    <defs>
+        <symbol id="i-home" viewBox="0 0 24 24"><path d="M3 10.5 12 3l9 7.5"/><path d="M5 9.5V20a1 1 0 0 0 1 1h4v-6h4v6h4a1 1 0 0 0 1-1V9.5"/></symbol>
+        <symbol id="i-users" viewBox="0 0 24 24"><path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M22 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></symbol>
+        <symbol id="i-calendar" viewBox="0 0 24 24"><rect x="3" y="4" width="18" height="18" rx="3"/><path d="M16 2v4M8 2v4M3 10h18"/></symbol>
+        <symbol id="i-image" viewBox="0 0 24 24"><rect x="3" y="3" width="18" height="18" rx="3"/><circle cx="9" cy="9" r="2"/><path d="m21 15-3.09-3.09a2 2 0 0 0-2.82 0L6 21"/></symbol>
+        <symbol id="i-plus" viewBox="0 0 24 24"><path d="M12 5v14M5 12h14"/></symbol>
+        <symbol id="i-copy" viewBox="0 0 24 24"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></symbol>
+        <symbol id="i-share" viewBox="0 0 24 24"><path d="M4 12v7a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2v-7"/><path d="m16 6-4-4-4 4"/><path d="M12 2v13"/></symbol>
+        <symbol id="i-logout" viewBox="0 0 24 24"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><path d="m16 17 5-5-5-5"/><path d="M21 12H9"/></symbol>
+        <symbol id="i-x" viewBox="0 0 24 24"><path d="M18 6 6 18M6 6l12 12"/></symbol>
+        <symbol id="i-eye" viewBox="0 0 24 24"><path d="M2 12s3.5-7 10-7 10 7 10 7-3.5 7-10 7S2 12 2 12Z"/><circle cx="12" cy="12" r="3"/></symbol>
+        <symbol id="i-eye-off" viewBox="0 0 24 24"><path d="M3 3l18 18"/><path d="M10.6 5.1A10 10 0 0 1 12 5c6.5 0 10 7 10 7a17 17 0 0 1-3.2 4.2M6.6 6.6A17 17 0 0 0 2 12s3.5 7 10 7a10 10 0 0 0 4.2-.9"/><path d="M9.9 9.9a3 3 0 0 0 4.2 4.2"/></symbol>
+        <symbol id="i-mail" viewBox="0 0 24 24"><rect x="2" y="4" width="20" height="16" rx="3"/><path d="m22 7-10 6L2 7"/></symbol>
+        <symbol id="i-lock" viewBox="0 0 24 24"><rect x="4" y="11" width="16" height="10" rx="3"/><path d="M8 11V7a4 4 0 0 1 8 0v4"/></symbol>
+        <symbol id="i-user" viewBox="0 0 24 24"><circle cx="12" cy="8" r="4"/><path d="M4 21v-1a6 6 0 0 1 6-6h4a6 6 0 0 1 6 6v1"/></symbol>
+        <symbol id="i-camera" viewBox="0 0 24 24"><path d="M3 8a2 2 0 0 1 2-2h2l1.5-2h7L17 6h2a2 2 0 0 1 2 2v10a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2Z"/><circle cx="12" cy="13" r="4"/></symbol>
+        <symbol id="i-left" viewBox="0 0 24 24"><path d="m15 18-6-6 6-6"/></symbol>
+        <symbol id="i-right" viewBox="0 0 24 24"><path d="m9 18 6-6-6-6"/></symbol>
+        <symbol id="i-star" viewBox="0 0 24 24"><path d="m12 3 2.7 5.6 6.1.9-4.4 4.3 1 6.1L12 17l-5.4 2.9 1-6.1L3.2 9.5l6.1-.9Z"/></symbol>
+        <symbol id="i-heart" viewBox="0 0 24 24"><path d="M12 21s-8-5.2-8-11a4.5 4.5 0 0 1 8-2.8A4.5 4.5 0 0 1 20 10c0 5.8-8 11-8 11Z"/></symbol>
+        <symbol id="i-sparkle" viewBox="0 0 24 24"><path d="M12 3v4M12 17v4M3 12h4M17 12h4M6 6l2.5 2.5M15.5 15.5 18 18M18 6l-2.5 2.5M8.5 15.5 6 18"/></symbol>
+        <symbol id="i-pencil" viewBox="0 0 24 24"><path d="M12 20h9"/><path d="M16.5 3.5a2.1 2.1 0 0 1 3 3L7 19l-4 1 1-4Z"/></symbol>
+        <symbol id="i-trash" viewBox="0 0 24 24"><path d="M3 6h18"/><path d="M8 6V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/><path d="m19 6-1 14a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2L5 6"/><path d="M10 11v6M14 11v6"/></symbol>
+        <symbol id="i-download" viewBox="0 0 24 24"><path d="M12 3v12"/><path d="m7 10 5 5 5-5"/><path d="M4 21h16"/></symbol>
+        <symbol id="i-folder" viewBox="0 0 24 24"><path d="M3 7a2 2 0 0 1 2-2h4l2 2h8a2 2 0 0 1 2 2v9a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2Z"/></symbol>
+        <symbol id="i-pin" viewBox="0 0 24 24"><path d="M12 21s-7-5.6-7-11a7 7 0 0 1 14 0c0 5.4-7 11-7 11Z"/><circle cx="12" cy="10" r="2.5"/></symbol>
+        <symbol id="i-arrow" viewBox="0 0 24 24"><path d="M5 12h14M13 6l6 6-6 6"/></symbol>
+    </defs>
+</svg>
 
-            <div class="memory-placeholder" aria-hidden="true">
-            <span>OUR<br>MEMORIES</span>
+<main class="app">
+
+    <!-- 하늘 + 구름 배경 -->
+    <div class="sky" aria-hidden="true">
+        <span class="cloud" style="--w:210px; top:6%;  --t:70s; --d:-12s"></span>
+        <span class="cloud" style="--w:140px; top:30%; --t:55s; --d:-40s"></span>
+        <span class="cloud" style="--w:260px; top:62%; --t:90s; --d:-30s"></span>
+        <span class="cloud" style="--w:120px; top:82%; --t:60s; --d:-5s"></span>
+    </div>
+
+    <!-- 1. 시작 화면 -->
+    <section id="home-screen" class="screen intro">
+        <div class="intro-art" aria-hidden="true">
+            <div class="deco deco-photo-card">
+                <div class="deco-photo"></div>
+                <span class="deco-note">our day ♡</span>
+            </div>
+            <div class="deco deco-badge deco-cam"><svg class="i"><use href="#i-camera"/></svg></div>
+            <div class="deco deco-badge deco-cal"><svg class="i"><use href="#i-calendar"/></svg></div>
+            <div class="deco deco-heart"><svg class="i fill"><use href="#i-heart"/></svg></div>
+        </div>
+
+        <div class="intro-text">
+            <h1 class="brand-title" aria-label="Save Memories">
+                <svg class="i fill brand-spark spark-a" aria-hidden="true"><use href="#i-star"/></svg>
+                <svg class="i fill brand-spark spark-b" aria-hidden="true"><use href="#i-star"/></svg>
+                <span class="brand-save">Save</span>
+                <span class="brand-memories">Memories</span>
+            </h1>
+            <p class="intro-sub">친구들과 약속 날짜를 맞추고,<br>함께한 추억을 한곳에 모아요.</p>
+        </div>
+
+        <button type="button" class="btn btn-primary btn-xl" data-go="login">
+            시작하기
+            <svg class="i"><use href="#i-arrow"/></svg>
+        </button>
+    </section>
+
+    <!-- 2. 로그인 -->
+    <section id="login-screen" class="screen auth" hidden>
+        <div class="auth-card">
+            <div class="auth-badge"><svg class="i"><use href="#i-camera"/></svg></div>
+            <h2>다시 만나서 반가워요</h2>
+            <p class="auth-sub">로그인하고 친구들과 날짜를 맞춰봐요.</p>
+
+            <form id="login-form" novalidate>
+                <label class="field">
+                    <svg class="i"><use href="#i-mail"/></svg>
+                    <input id="login-email" name="email" type="email" placeholder="이메일" aria-label="이메일" autocomplete="email" required>
+                </label>
+                <label class="field">
+                    <svg class="i"><use href="#i-lock"/></svg>
+                    <input id="login-password" name="password" type="password" placeholder="비밀번호" aria-label="비밀번호" autocomplete="current-password" required>
+                    <button type="button" class="pw-toggle" data-target="login-password" aria-label="비밀번호 보기"><svg class="i"><use href="#i-eye"/></svg></button>
+                </label>
+                <p id="login-error" class="form-error" role="alert" hidden></p>
+                <button type="submit" class="btn btn-primary btn-block">로그인</button>
+            </form>
+
+            <p class="auth-switch">아직 회원이 아니신가요? <button type="button" class="link-btn" data-go="register">회원가입</button></p>
+            <button type="button" class="link-btn muted" data-go="home">← 처음으로</button>
+        </div>
+    </section>
+
+    <!-- 3. 회원가입 -->
+    <section id="register-screen" class="screen auth" hidden>
+        <div class="auth-card">
+            <div class="auth-badge lav"><svg class="i"><use href="#i-user"/></svg></div>
+            <h2>우리 같이 시작해요</h2>
+            <p class="auth-sub">닉네임은 친구들 달력에 표시돼요.</p>
+
+            <form id="register-form" novalidate>
+                <label class="field">
+                    <svg class="i"><use href="#i-user"/></svg>
+                    <input id="register-nickname" name="nickname" type="text" placeholder="닉네임" aria-label="닉네임" maxlength="50" autocomplete="nickname" required>
+                </label>
+                <label class="field">
+                    <svg class="i"><use href="#i-mail"/></svg>
+                    <input id="register-email" name="email" type="email" placeholder="이메일" aria-label="이메일" autocomplete="email" required>
+                </label>
+                <label class="field">
+                    <svg class="i"><use href="#i-lock"/></svg>
+                    <input id="register-password" name="password" type="password" placeholder="비밀번호 (8자 이상)" aria-label="비밀번호" minlength="8" autocomplete="new-password" required>
+                    <button type="button" class="pw-toggle" data-target="register-password" aria-label="비밀번호 보기"><svg class="i"><use href="#i-eye"/></svg></button>
+                </label>
+                <p id="register-error" class="form-error" role="alert" hidden></p>
+                <button type="submit" class="btn btn-primary btn-block">회원가입</button>
+            </form>
+
+            <p class="auth-switch">이미 회원이신가요? <button type="button" class="link-btn" data-go="login">로그인</button></p>
+            <button type="button" class="link-btn muted" data-go="home">← 처음으로</button>
+        </div>
+    </section>
+
+    <!-- 4~7. 로그인 이후 -->
+    <section id="main-screen" class="screen main" hidden>
+
+        <header class="appbar">
+            <div class="appbar-title">
+                <strong id="appbar-main">Save Memories</strong>
+                <span id="appbar-sub" class="appbar-sub" hidden></span>
+            </div>
+            <button type="button" id="menu-button" class="avatar-btn" aria-label="내 메뉴" aria-expanded="false">
+                <span id="avatar-initial">?</span>
+            </button>
+        </header>
+
+        <div id="menu-panel" class="menu-panel" hidden>
+            <p id="menu-user" class="menu-user"></p>
+            <p id="menu-since" class="menu-since"></p>
+            <button type="button" id="menu-logout" class="btn btn-soft btn-block">
+                <svg class="i"><use href="#i-logout"/></svg> 로그아웃
+            </button>
+        </div>
+
+        <div class="tab-panels">
+
+            <!-- Home -->
+            <div id="tab-home" class="tab-panel">
+                <div class="hello">
+                    <p class="hello-sub">오늘도 추억을 모아볼까요?</p>
+                    <h2 id="hello-title">안녕하세요!</h2>
+                </div>
+
+                <div class="section-head">
+                    <h3>내 방</h3>
+                    <span id="room-count" class="chip"></span>
+                </div>
+
+                <div id="room-grid" class="room-grid">
+                    <button type="button" id="create-room-button" class="room-card new">
+                        <span class="new-plus"><svg class="i"><use href="#i-plus"/></svg></span>
+                        <strong>새 방 만들기</strong>
+                        <span class="rc-hint">누르면 바로 만들어져요</span>
+                    </button>
+                </div>
+
+                <form id="join-form" class="join-card">
+                    <label for="join-code" class="join-title">초대 코드가 있나요?</label>
+                    <p class="join-sub">친구에게 받은 코드를 입력하면 바로 참여해요.</p>
+                    <div class="join-row">
+                        <input id="join-code" type="text" maxlength="12" placeholder="예: A1B2C3" autocomplete="off" autocapitalize="characters" spellcheck="false">
+                        <button type="submit" class="btn btn-primary">참여</button>
+                    </div>
+                </form>
             </div>
 
-            <button type="button" class="primary-button"
-            data-go="login">
-            시작하기
-            </button>
+            <!-- Room -->
+            <div id="tab-room" class="tab-panel" hidden>
+                <div id="room-empty" class="empty-state">
+                    <div class="empty-icon"><svg class="i"><use href="#i-users"/></svg></div>
+                    <p>Home에서 방을 만들거나 선택해 주세요.</p>
+                </div>
+
+                <div id="room-detail" hidden>
+                    <div class="invite-card">
+                        <p class="eyebrow">초대 코드</p>
+                        <div id="share-code" class="code-display">------</div>
+                        <div class="invite-actions">
+                            <button type="button" id="copy-code" class="btn btn-soft"><svg class="i"><use href="#i-copy"/></svg> 코드 복사</button>
+                            <button type="button" id="share-native" class="btn btn-soft" hidden><svg class="i"><use href="#i-share"/></svg> 공유</button>
+                        </div>
+                        <p class="eyebrow">초대 링크</p>
+                        <div class="link-row">
+                            <span id="share-link" class="link-text"></span>
+                            <button type="button" id="copy-link" class="icon-btn" aria-label="링크 복사"><svg class="i"><use href="#i-copy"/></svg></button>
+                        </div>
+                    </div>
+
+                    <div class="section-head">
+                        <h3>멤버</h3>
+                        <span id="member-count" class="chip"></span>
+                    </div>
+                    <ul id="member-list" class="member-list"></ul>
+
+                    <button type="button" id="leave-room-button" class="btn btn-danger btn-block">
+                        <svg class="i"><use href="#i-logout"/></svg> 이 방 나가기
+                    </button>
+                </div>
+            </div>
+
+            <!-- Calendar -->
+            <div id="tab-calendar" class="tab-panel" hidden>
+                <div id="calendar-empty" class="empty-state">
+                    <div class="empty-icon"><svg class="i"><use href="#i-calendar"/></svg></div>
+                    <p>Home에서 방을 만들거나 선택해 주세요.</p>
+                </div>
+
+                <div id="calendar-area" hidden>
+                    <div class="seg" role="tablist">
+                        <button type="button" class="seg-btn active" data-cal-view="dates">날짜 정하기</button>
+                        <button type="button" class="seg-btn" data-cal-view="list">약속 목록</button>
+                    </div>
+
+                    <!-- 날짜 정하기 -->
+                    <div id="cal-view-dates">
+                        <div class="members-strip">
+                            <div id="members-avatars" class="avatar-stack"></div>
+                            <span id="save-state" class="save-state">되는 날짜를 눌러 선택해요</span>
+                        </div>
+
+                        <div class="cal-card">
+                            <div class="cal-nav">
+                                <button type="button" id="cal-prev" class="icon-btn" aria-label="이전 달"><svg class="i"><use href="#i-left"/></svg></button>
+                                <div class="cal-title">
+                                    <span id="cal-month">NOVEMBER</span>
+                                    <small id="cal-year">2026</small>
+                                </div>
+                                <button type="button" id="cal-next" class="icon-btn" aria-label="다음 달"><svg class="i"><use href="#i-right"/></svg></button>
+                            </div>
+
+                            <div class="cal-weekdays" aria-hidden="true">
+                                <span>월</span><span>화</span><span>수</span><span>목</span><span>금</span><span class="sat">토</span><span class="sun">일</span>
+                            </div>
+                            <div id="cal-days" class="cal-days"></div>
+
+                            <ul id="cal-legend" class="legend"></ul>
+                        </div>
+
+                        <div class="best-card">
+                            <h3><svg class="i"><use href="#i-sparkle"/></svg> 잘 맞는 날</h3>
+                            <ul id="best-list" class="best-list"></ul>
+                            <p id="best-empty" class="best-empty">친구들이 날짜를 고르면<br>겹치는 날이 여기에 나와요.</p>
+                        </div>
+                    </div>
+
+                    <!-- 약속 목록 -->
+                    <div id="cal-view-list" hidden>
+                        <div class="section-head">
+                            <h3>우리의 약속</h3>
+                            <button type="button" id="appt-add" class="btn btn-primary btn-sm"><svg class="i"><use href="#i-plus"/></svg> 약속 잡기</button>
+                        </div>
+                        <ul id="appt-list" class="appt-list"></ul>
+                        <button type="button" id="appt-more" class="more-btn" hidden>더보기..</button>
+                        <div id="appt-empty" class="empty-state small" hidden>
+                            <div class="empty-icon"><svg class="i"><use href="#i-calendar"/></svg></div>
+                            <p>아직 잡힌 약속이 없어요.<br>날짜를 정하고 뭐 하고 놀지 적어보세요!</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Picture -->
+            <div id="tab-picture" class="tab-panel" hidden>
+                <div id="picture-empty" class="empty-state">
+                    <div class="empty-icon"><svg class="i"><use href="#i-image"/></svg></div>
+                    <p>Home에서 방을 만들거나 선택해 주세요.</p>
+                </div>
+
+                <div id="picture-area" hidden>
+                    <!-- 폴더 목록 -->
+                    <div id="folder-view">
+                        <div class="section-head">
+                            <h3>사진 폴더</h3>
+                            <span id="folder-count" class="chip"></span>
+                        </div>
+                        <div id="folder-grid" class="folder-grid">
+                            <button type="button" id="folder-add" class="folder-card new">
+                                <span class="new-plus"><svg class="i"><use href="#i-plus"/></svg></span>
+                                <strong>새 폴더</strong>
+                            </button>
+                        </div>
+                    </div>
+
+                    <!-- 폴더 안 -->
+                    <div id="album-view" hidden>
+                        <div class="album-head">
+                            <button type="button" id="album-back" class="icon-btn" aria-label="폴더 목록으로"><svg class="i"><use href="#i-left"/></svg></button>
+                            <div class="album-title">
+                                <strong id="album-name">폴더</strong>
+                                <span id="album-date"></span>
+                            </div>
+                            <button type="button" id="album-edit" class="icon-btn" aria-label="폴더 수정"><svg class="i"><use href="#i-pencil"/></svg></button>
+                            <button type="button" id="album-delete" class="icon-btn danger" aria-label="폴더 삭제"><svg class="i"><use href="#i-trash"/></svg></button>
+                        </div>
+                        <p id="album-note" class="album-note" hidden></p>
+
+                        <button type="button" id="photo-add" class="btn btn-primary btn-sm"><svg class="i"><use href="#i-plus"/></svg> 사진 추가</button>
+                        <input id="photo-input" type="file" accept="image/jpeg,image/png,image/webp" multiple hidden>
+
+                        <div id="photo-grid" class="photo-masonry"></div>
+                        <div id="photo-empty" class="empty-state small">
+                            <div class="empty-icon"><svg class="i"><use href="#i-camera"/></svg></div>
+                            <p>이 폴더에 사진이 없어요.<br>첫 추억을 남겨보세요!</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
         </div>
-        </section>
 
-        <!-- 로그인 화면 -->
-        <section id="login-screen" class="screen" hidden>
-        <div class="form-panel">
-            <h2>로그인</h2>
-            <p class="form-description">
-            다시 만나서 반가워요!
-            </p>
-
-            <form id="login-form">
-            <label for="login-email">이메일</label>
-            <input
-                id="login-email"
-                name="email"
-                type="email"
-                placeholder="이메일을 입력하세요"
-                autocomplete="email"
-                required
-            >
-
-            <label for="login-password">비밀번호</label>
-            <input
-                id="login-password"
-                name="password"
-                type="password"
-                placeholder="비밀번호를 입력하세요"
-                autocomplete="current-password"
-                required
-            >
-
-            <button type="submit" class="primary-button">
-                로그인
-            </button>
-            </form>
-
-            <p class="form-footer">
-            아직 회원이 아니신가요?
-            <button type="button" class="text-button"
-                data-go="register">
-                회원가입
-            </button>
-            </p>
-
-            <button type="button" class="back-button"
-            data-go="home">
-            ← 처음으로
-            </button>
-        </div>
-        </section>
-
-        <!-- 회원가입 화면 -->
-        <section id="register-screen" class="screen" hidden>
-        <div class="form-panel">
-            <h2>회원가입</h2>
-            <p class="form-description">
-            우리만의 추억을 시작해 보세요.
-            </p>
-
-            <form id="register-form">
-            <label for="register-nickname">닉네임</label>
-            <input
-                id="register-nickname"
-                name="nickname"
-                type="text"
-                placeholder="사용할 닉네임"
-                autocomplete="nickname"
-                required
-            >
-
-            <label for="register-email">이메일</label>
-            <input
-                id="register-email"
-                name="email"
-                type="email"
-                placeholder="이메일을 입력하세요"
-                autocomplete="email"
-                required
-            >
-
-            <label for="register-password">비밀번호</label>
-            <input
-                id="register-password"
-                name="password"
-                type="password"
-                placeholder="비밀번호 8자 이상"
-                minlength="8"
-                autocomplete="new-password"
-                required
-            >
-
-            <button type="submit" class="primary-button">
-                회원가입
-            </button>
-            </form>
-
-            <p class="form-footer">
-            이미 회원이신가요?
-            <button type="button" class="text-button"
-                data-go="login">
-                로그인
-            </button>
-            </p>
-
-            <button type="button" class="back-button"
-            data-go="home">
-            ← 처음으로
-            </button>
-        </div>
-        </section>
-    <!-- 로그인 후 화면 -->
-        <section id="dashboard-screen" class="screen" hidden>
-    <div class="form-panel">
-        <h2>Time Remember</h2>
-        <p id="welcome-message" class="form-description">
-        환영합니다!
-        </p>
-
-        <h3>새로운 친구 방 만들기</h3>
-        <form id="create-room-form">
-        <label for="room-name">방 이름</label>
-        <input
-            id="room-name"
-            name="room_name"
-            maxlength="100"
-            placeholder="예: 우리들의 추억"
-            required
-        >
-
-        <label for="room-description">방 설명</label>
-        <input
-            id="room-description"
-            name="description"
-            maxlength="500"
-            placeholder="방에 대한 간단한 설명"
-        >
-
-        <button type="submit" class="primary-button">
-            방 만들기
-        </button>
-        </form>
-
-        <hr>
-
-        <h3>초대 코드로 참여하기</h3>
-        <form id="join-room-form">
-        <label for="invite-code">초대 코드</label>
-        <input
-            id="invite-code"
-            name="invite_code"
-            placeholder="초대 코드를 입력하세요"
-            required
-        >
-
-        <button type="submit" class="primary-button">
-            방 참여하기
-        </button>
-        </form>
-
-        <hr>
-
-        <h3>내 친구 방</h3>
-        <button type="button" id="refresh-rooms-button">
-        방 목록 새로고침
-        </button>
-        <div id="room-list"></div>
-
-        <button type="button" id="logout-button" class="primary-button">
-        로그아웃
-        </button>
-    </div>
+        <nav class="tabbar" aria-label="메인 메뉴">
+            <button type="button" class="tab active" data-tab="home"><span class="tab-ic"><svg class="i"><use href="#i-home"/></svg></span>Home</button>
+            <button type="button" class="tab" data-tab="room"><span class="tab-ic"><svg class="i"><use href="#i-users"/></svg></span>Room</button>
+            <button type="button" class="tab" data-tab="calendar"><span class="tab-ic"><svg class="i"><use href="#i-calendar"/></svg></span>Calendar</button>
+            <button type="button" class="tab" data-tab="picture"><span class="tab-ic"><svg class="i"><use href="#i-image"/></svg></span>Picture</button>
+        </nav>
     </section>
-    <!-- 약속 화면 -->
-    <section id="appointments-screen" class="screen" hidden>
-    <div class="form-panel">
-        <h2 id="appointment-room-title">친구 방</h2>
-        <p class="form-description">우리의 다음 만남을 계획해 보세요.</p>
 
-        <form id="appointment-form">
-        <label for="appointment-title">약속 제목</label>
-        <input
-            id="appointment-title"
-            name="title"
-            maxlength="200"
-            placeholder="예: 주말에 영화 보기"
-            required
-        >
+    <!-- 방 만들기 완료: 랜덤 코드 + 링크 창 -->
+    <div id="share-dialog" class="overlay" hidden>
+        <div class="dialog share-dialog" role="dialog" aria-modal="true" aria-labelledby="dlg-title">
+            <button type="button" id="dlg-close" class="dialog-close" aria-label="닫기"><svg class="i"><use href="#i-x"/></svg></button>
+            <div class="dialog-emoji"><svg class="i fill"><use href="#i-heart"/></svg></div>
+            <h3 id="dlg-title">방이 만들어졌어요!</h3>
+            <p class="dialog-sub">코드나 링크를 친구들에게 보내 주세요.</p>
 
-        <label for="appointment-date">날짜와 시간</label>
-        <input
-            id="appointment-date"
-            name="start_at"
-            type="datetime-local"
-            required
-        >
+            <p class="eyebrow on-blue">랜덤 코드</p>
+            <div id="dlg-code" class="yellow-box">------</div>
+            <button type="button" id="dlg-copy-code" class="btn btn-white btn-block"><svg class="i"><use href="#i-copy"/></svg> 코드 복사</button>
 
-        <label for="appointment-place">장소</label>
-        <input
-            id="appointment-place"
-            name="place"
-            maxlength="255"
-            placeholder="예: 강남역"
-            required
-        >
+            <p class="eyebrow on-blue">초대 링크</p>
+            <div id="dlg-link" class="yellow-box link"></div>
+            <button type="button" id="dlg-copy-link" class="btn btn-white btn-block"><svg class="i"><use href="#i-copy"/></svg> 링크 복사</button>
 
-        <label for="appointment-description">설명</label>
-        <textarea
-            id="appointment-description"
-            name="description"
-            maxlength="2000"
-            rows="3"
-            placeholder="추가로 기록할 내용"
-        ></textarea>
-
-        <button type="submit" class="primary-button">
-            약속 등록하기
-        </button>
-        </form>
-
-        <hr>
-
-        <h3>등록된 약속</h3>
-        <div id="appointment-list"></div>
-
-        <button type="button" id="back-to-rooms" class="back-button">
-        ← 친구 방으로 돌아가기
-        </button>
+            <button type="button" id="dlg-go" class="btn btn-primary btn-block">날짜 정하러 가기 <svg class="i"><use href="#i-arrow"/></svg></button>
+        </div>
     </div>
-    </section>
-    </main>
-    </body>
-    </html>
+
+    <!-- 사진 크게 보기 -->
+    <div id="lightbox" class="overlay lightbox" hidden>
+        <button type="button" id="lightbox-close" class="dialog-close light" aria-label="닫기"><svg class="i"><use href="#i-x"/></svg></button>
+        <button type="button" id="lb-prev" class="lb-nav prev" aria-label="이전 사진"><svg class="i"><use href="#i-left"/></svg></button>
+        <button type="button" id="lb-next" class="lb-nav next" aria-label="다음 사진"><svg class="i"><use href="#i-right"/></svg></button>
+        <div class="viewer-card">
+            <img id="lightbox-img" alt="">
+            <div class="viewer-bar">
+                <div class="viewer-text">
+                    <span id="lightbox-caption" class="viewer-caption"></span>
+                    <span id="lightbox-meta" class="viewer-meta"></span>
+                </div>
+                <div class="viewer-actions">
+                    <button type="button" id="lb-like" class="vb" aria-label="좋아요"><svg class="i"><use href="#i-heart"/></svg><span id="lb-like-count"></span></button>
+                    <button type="button" id="lb-edit" class="vb" aria-label="설명 수정"><svg class="i"><use href="#i-pencil"/></svg></button>
+                    <button type="button" id="lb-delete" class="vb" aria-label="사진 삭제"><svg class="i"><use href="#i-trash"/></svg></button>
+                    <a id="lb-download" class="vb" aria-label="다운로드" download><svg class="i"><use href="#i-download"/></svg></a>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- 입력 창 (약속 / 폴더 / 사진 설명) -->
+    <div id="form-dialog" class="overlay" hidden>
+        <form id="form-dialog-form" class="dialog form-dialog" novalidate>
+            <button type="button" id="form-close" class="dialog-close" aria-label="닫기"><svg class="i"><use href="#i-x"/></svg></button>
+            <h3 id="form-title"></h3>
+            <div id="form-fields" class="form-fields"></div>
+            <p id="form-error" class="form-error" role="alert" hidden></p>
+            <div class="confirm-actions">
+                <button type="button" id="form-cancel" class="btn btn-soft">취소</button>
+                <button type="submit" id="form-submit" class="btn btn-primary">저장</button>
+            </div>
+        </form>
+    </div>
+
+    <!-- 확인 창 -->
+    <div id="confirm-dialog" class="overlay" hidden>
+        <div class="dialog confirm-dialog" role="alertdialog" aria-modal="true" aria-labelledby="confirm-title">
+            <h3 id="confirm-title">정말 나갈까요?</h3>
+            <p id="confirm-message" class="dialog-sub"></p>
+            <div class="confirm-actions">
+                <button type="button" id="confirm-cancel" class="btn btn-soft">취소</button>
+                <button type="button" id="confirm-ok" class="btn btn-danger-solid">확인</button>
+            </div>
+        </div>
+    </div>
+
+    <div id="toast" class="toast" role="status" aria-live="polite"></div>
+</main>
+
+</body>
+</html>
