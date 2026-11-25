@@ -2,24 +2,25 @@
 
 > 친구들과 **방**을 만들어 약속 **날짜를 맞추고**, 날짜별 **사진 폴더**로 추억을 저장하는 웹 서비스
 
-| | |
-|---|---|
-| 팀 / 역할 | (팀원 이름과 맡은 역할을 입력하세요) |
-| 기술 | Node.js · Express 5 · MySQL(InnoDB) · Vanilla JavaScript |
-| DB | 제3정규형(3NF), 테이블 8개, 모든 관계에 외래키 적용 |
+| 구분          | 내용                                             |
+| ------------- | ------------------------------------------------ |
+| 프로젝트 유형 | 개인 프로젝트                                    |
+| 개발 및 담당  | 기획 · DB 설계 · 프론트엔드 · 백엔드 · 테스트    |
+| 기술          | Node.js · Express 5 · MySQL · Vanilla JavaScript |
+| DB            | 제3정규형(3NF), 테이블 8개, 외래 키 적용         |
 
 ## 주요 기능
 
-| 기능 | 설명 |
-|---|---|
-| 회원가입 / 로그인 | 이메일 + 비밀번호(bcrypt 해시), 세션 로그인 |
-| 방 만들기 | + 버튼 한 번으로 방 생성, 랜덤 초대 코드와 초대 링크 자동 발급 |
-| 방 참여 | 초대 링크로 접속하거나 코드를 입력해서 참여 |
-| 방 나가기 | 방장이 나가면 다음 멤버에게 방장 위임, 마지막 멤버가 나가면 방 삭제 |
-| 날짜 정하기 | 달력에서 되는 날짜를 누르면 멤버별 색상 점으로 표시, 모두 되는 날은 강조, 겹치는 날 추천 |
-| 약속 | 날짜 + 뭐 하고 놀지 + 장소 + 메모를 정리하고 수정/삭제, 목록 "더보기.." |
-| 사진 폴더 | 날짜별 폴더를 만들고 폴더 안에 사진 여러 장 업로드 |
-| 사진 상세 | 좋아요, 설명 수정, 삭제, 다운로드 |
+| 기능              | 설명                                                                                     |
+| ----------------- | ---------------------------------------------------------------------------------------- |
+| 회원가입 / 로그인 | 이메일 + 비밀번호(bcrypt 해시), 세션 로그인                                              |
+| 방 만들기         | + 버튼 한 번으로 방 생성, 랜덤 초대 코드와 초대 링크 자동 발급                           |
+| 방 참여           | 초대 링크로 접속하거나 코드를 입력해서 참여                                              |
+| 방 나가기         | 방장이 나가면 다음 멤버에게 방장 위임, 마지막 멤버가 나가면 방 삭제                      |
+| 날짜 정하기       | 달력에서 되는 날짜를 누르면 멤버별 색상 점으로 표시, 모두 되는 날은 강조, 겹치는 날 추천 |
+| 약속              | 날짜 + 뭐 하고 놀지 + 장소 + 메모를 정리하고 수정/삭제, 목록 "더보기.."                  |
+| 사진 폴더         | 날짜별 폴더를 만들고 폴더 안에 사진 여러 장 업로드                                       |
+| 사진 상세         | 좋아요, 설명 수정, 삭제, 다운로드                                                        |
 
 ## 실행 방법
 
@@ -43,16 +44,16 @@ npm start
 
 ### 샘플 계정 (비밀번호는 모두 `password1234`)
 
-| 이메일 | 닉네임 | 비고 |
-|---|---|---|
-| jisu@example.com | 지수 | "우리 셋의 방"(SAVE01) 방장 |
-| minsu@example.com | 민수 | "동아리 모임"(CLUB22) 방장 |
-| haeun@example.com | 하은 | |
+| 이메일            | 닉네임 | 비고                        |
+| ----------------- | ------ | --------------------------- |
+| jisu@example.com  | 지수   | "우리 셋의 방"(SAVE01) 방장 |
+| minsu@example.com | 민수   | "동아리 모임"(CLUB22) 방장  |
+| haeun@example.com | 하은   |                             |
 
 샘플 방 `SAVE01`에는 세 명의 가능한 날짜, 약속 3개, 사진 폴더 2개(사진 4장)가 들어 있어요.
 
-> 서버는 시작할 때 DB 구조가 설계(`database/save_memories.sql`)와 **정확히 같은지** 확인하고,
-> 다르면 어떤 칼럼이 다른지 알려 준 뒤 종료해요.
+> 서버는 시작할 때 필요한 테이블과 칼럼이 존재하는지 확인합니다.
+> 설계에 없는 추가 칼럼은 허용합니다.
 
 ## 데이터베이스 설계
 
@@ -116,6 +117,7 @@ erDiagram
     photo_likes { int photo_id PK,FK
             int user_id PK,FK }
 ```
+
 </details>
 
 ### 제3정규형 근거
@@ -137,38 +139,38 @@ erDiagram
 
 ### DB 설계와 코드의 연결
 
-| 테이블 | 사용하는 코드 | 기능 |
-|---|---|---|
-| users | `routes/auth.js`, `routes/users.js` | 회원가입, 로그인, 내 정보(가입일) |
-| rooms | `routes/rooms.js` | 방 생성, 방 목록, 방장 위임, 방 삭제 |
-| room_members | `routes/rooms.js` | 방 참여, 멤버 목록(참여일), 방 나가기, 접근 권한 검사 |
-| room_availabilities | `routes/rooms.js` | 되는 날짜 저장/조회, 달력 표시 |
-| appointments | `routes/appointments.js` | 약속 등록/조회/수정/삭제 |
-| photo_folders | `routes/photos.js` | 날짜별 사진 폴더 |
-| photos | `routes/photos.js` | 사진 업로드/조회/설명 수정/삭제 |
-| photo_likes | `routes/photos.js` | 사진 좋아요 |
+| 테이블              | 사용하는 코드                       | 기능                                                  |
+| ------------------- | ----------------------------------- | ----------------------------------------------------- |
+| users               | `routes/auth.js`, `routes/users.js` | 회원가입, 로그인, 내 정보(가입일)                     |
+| rooms               | `routes/rooms.js`                   | 방 생성, 방 목록, 방장 위임, 방 삭제                  |
+| room_members        | `routes/rooms.js`                   | 방 참여, 멤버 목록(참여일), 방 나가기, 접근 권한 검사 |
+| room_availabilities | `routes/rooms.js`                   | 되는 날짜 저장/조회, 달력 표시                        |
+| appointments        | `routes/appointments.js`            | 약속 등록/조회/수정/삭제                              |
+| photo_folders       | `routes/photos.js`                  | 날짜별 사진 폴더                                      |
+| photos              | `routes/photos.js`                  | 사진 업로드/조회/설명 수정/삭제                       |
+| photo_likes         | `routes/photos.js`                  | 사진 좋아요                                           |
 
 ## API
 
 모든 API는 `/api` 아래에 있고, 회원가입/로그인을 제외하면 로그인이 필요합니다.
 방과 관련된 API는 **그 방의 멤버만** 사용할 수 있습니다.
 
-| 분류 | 메서드 · 주소 | 설명 |
-|---|---|---|
+| 분류 | 메서드 · 주소                                         | 설명                               |
+| ---- | ----------------------------------------------------- | ---------------------------------- |
 | 회원 | `POST /signup` `POST /login` `POST /logout` `GET /me` | 가입 · 로그인 · 로그아웃 · 내 정보 |
-| 방 | `GET /rooms` `POST /rooms` | 내 방 목록 · 방 만들기 |
-| | `POST /rooms/join` | 초대 코드로 참여 |
-| | `GET /rooms/:roomId` | 방 정보 + 멤버 + 멤버별 되는 날짜 |
-| | `PUT /rooms/:roomId/dates` | 내가 되는 날짜 저장 |
-| | `POST /rooms/:roomId/leave` | 방 나가기 |
-| 약속 | `GET` `POST /rooms/:roomId/appointments` | 목록 · 등록 |
-| | `PUT` `DELETE /rooms/:roomId/appointments/:id` | 수정 · 삭제 |
-| 폴더 | `GET` `POST /rooms/:roomId/folders` | 목록 · 만들기 |
-| | `PUT` `DELETE /rooms/:roomId/folders/:id` | 수정 · 삭제 |
-| 사진 | `GET /rooms/:roomId/photos?folder_id=` | 폴더 안 사진 목록 |
-| | `POST /rooms/:roomId/photos` | 업로드 (`photo`, `folder_id`) |
-| | `PUT` `DELETE /rooms/:roomId/photos/:id` | 설명 수정 · 삭제 |
-| | `POST /rooms/:roomId/photos/:id/like` | 좋아요 켜기/끄기 |
+| 방   | `GET /rooms` `POST /rooms`                            | 내 방 목록 · 방 만들기             |
+|      | `POST /rooms/join`                                    | 초대 코드로 참여                   |
+|      | `GET /rooms/:roomId`                                  | 방 정보 + 멤버 + 멤버별 되는 날짜  |
+|      | `PUT /rooms/:roomId/dates`                            | 내가 되는 날짜 저장                |
+|      | `POST /rooms/:roomId/leave`                           | 방 나가기                          |
+| 약속 | `GET` `POST /rooms/:roomId/appointments`              | 목록 · 등록                        |
+|      | `PUT` `DELETE /rooms/:roomId/appointments/:id`        | 수정 · 삭제                        |
+| 폴더 | `GET` `POST /rooms/:roomId/folders`                   | 목록 · 만들기                      |
+|      | `PUT` `DELETE /rooms/:roomId/folders/:id`             | 수정 · 삭제                        |
+| 사진 | `GET /rooms/:roomId/photos?folder_id=`                | 폴더 안 사진 목록                  |
+|      | `POST /rooms/:roomId/photos`                          | 업로드 (`photo`, `folder_id`)      |
+|      | `PUT` `DELETE /rooms/:roomId/photos/:id`              | 설명 수정 · 삭제                   |
+|      | `POST /rooms/:roomId/photos/:id/like`                 | 좋아요 켜기/끄기                   |
 
 ## 보안
 
