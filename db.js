@@ -14,7 +14,8 @@ const pool = mysql.createPool({
 });
 
 // database/save_memories.sql 에서 설계한 테이블과 칼럼 목록
-// 코드가 이 구조와 정확히 같은 DB 위에서만 동작하도록 서버 시작 때 확인한다.
+// 서버 시작 때 필요한 테이블과 칼럼이 존재하는지 확인한다.
+// 설계에 없는 추가 칼럼은 허용한다.
 const DESIGNED_SCHEMA = {
     users: ["user_id", "email", "password_hash", "nickname", "created_at"],
     rooms: ["room_id", "owner_user_id", "room_name", "invite_code", "created_at"],
@@ -58,13 +59,11 @@ async function checkSchema() {
         columns.filter((column) => !found.has(column))
             .forEach((column) => problems.push(`칼럼 없음: ${table}.${column}`));
 
-        [...found].filter((column) => !columns.includes(column))
-            .forEach((column) => problems.push(`설계에 없는 칼럼: ${table}.${column}`));
     });
 
     if (problems.length > 0) {
         const error = new Error(
-            "DB 구조가 설계(database/save_memories.sql)와 다릅니다.\n  - " +
+            "DB에 필요한 테이블 또는 칼럼이 없습니다.\n  - " +
             problems.join("\n  - ")
         );
         error.code = "SCHEMA_MISMATCH";
